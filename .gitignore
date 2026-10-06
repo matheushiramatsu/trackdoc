@@ -1,0 +1,12 @@
+.vercel
+node_modules/
+vendor/tts/
+dist/
+release/
+.DS_Store
+.tmp-chrome-ext/
+.tlc/
+.env*.local
+extension.pem
+extension.crx
+downloads/*.zip

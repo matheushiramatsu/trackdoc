@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title data-i18n="doc.title.editor">TrackDoc</title>
+  <meta name="description" content="Mostre o seu produto passo a passo: capture as telas, destaque o clique e narre. Envie um link ou um HTML — quem abre percorre o tour ou assiste." />
+  <meta name="theme-color" content="#1732FF" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TrackDoc" />
+  <meta property="og:title" content="TrackDoc" />
+  <meta property="og:description" content="Mostre o seu produto passo a passo: capture as telas, destaque o clique e narre. Envie um link ou um HTML — quem abre percorre o tour ou assiste." />
+  <meta property="og:image" content="https://guiaflow-seven.vercel.app/og-share.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TrackDoc" />
+  <meta name="twitter:description" content="Mostre o seu produto passo a passo: capture as telas, destaque o clique e narre. Envie um link ou um HTML — quem abre percorre o tour ou assiste." />
+  <meta name="twitter:image" content="https://guiaflow-seven.vercel.app/og-share.png" />
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("ns-locale");
+        var langs = navigator.languages || (navigator.language ? [navigator.language] : []);
+        var pick = stored;
+        if (!pick) {
+          for (var i = 0; i < langs.length; i++) {
+            var p = String(langs[i] || "").toLowerCase().split("-")[0];
+            if (p === "pt" || p === "es" || p === "en") { pick = p; break; }
+          }
+        }
+        if (pick !== "pt" && pick !== "es" && pick !== "en") pick = "en";
+        var htmlLang = pick === "pt" ? "pt-BR" : pick;
+        document.documentElement.lang = htmlLang;
+      } catch (e) {}
+    })();
+  </script>
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem("ns-appearance") || "system";
+        var mode = pref;
+        if (pref !== "documento" && pref !== "social") {
+          mode = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "social"
+            : "documento";
+        }
+        document.documentElement.setAttribute("data-appearance", mode);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = "#0a0a0f";
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <script async src="https://tally.so/widgets/embed.js"></script>
+  <link rel="stylesheet" href="a/10/vendor/driver/driver.css" />
+  <link rel="stylesheet" href="a/10/css/theme.css" />
+  <link rel="stylesheet" href="a/10/css/app.css" />
+</head>
+<body class="is-booting">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="logo"><img src="trackdocs-logo-branco.svg" alt="TrackDoc" /></span>
+      <nav class="topbar-nav" id="topbar-nav-editor" hidden aria-label="Projeto">
+        <button type="button" class="btn btn-ghost btn-nav-back" id="btn-projects" title="Projetos" data-i18n-title="topbar.projects">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-folder"></use></svg>
+          <span data-i18n="topbar.projects">Projetos</span>
+        </button>
+        <span class="topbar-nav-sep" aria-hidden="true">/</span>
+        <span
+          class="topbar-project"
+          id="topbar-project"
+          hidden
+          title="Clique para renomear"
+          data-i18n-title="library.renameTitle"
+          role="button"
+          tabindex="0"
+        ></span>
+      </nav>
+    </div>
+    <div class="topbar-tools">
+      <div class="topbar-actions" id="topbar-actions-editor" hidden>
+        <button type="button" class="btn btn-ghost" id="btn-capture-desktop" hidden>
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-camera"></use></svg>
+          <span data-i18n="topbar.capture">Capturar</span>
+        </button>
+        <button type="button" class="btn btn-ghost btn-icon" id="btn-undo" title="Desfazer" aria-label="Desfazer" data-i18n-title="topbar.undo" data-i18n-aria="topbar.undo" disabled>
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-undo"></use></svg>
+        </button>
+        <button type="button" class="btn btn-ghost btn-icon" id="btn-redo" title="Refazer" aria-label="Refazer" data-i18n-title="topbar.redo" data-i18n-aria="topbar.redo" disabled>
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-redo"></use></svg>
+        </button>
+        <div class="preview-split">
+          <button type="button" class="btn btn-primary" id="btn-play-from">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-eye"></use></svg>
+            <span data-i18n="toolbar.preview">Preview</span>
+          </button>
+          <details class="preview-menu">
+            <summary class="btn btn-primary preview-menu-toggle" aria-label="Mais opções de preview" data-i18n-aria="toolbar.previewMore">
+              <svg class="btn-ico" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+            </summary>
+            <div class="preview-menu-body">
+              <button type="button" class="preview-menu-option" id="btn-watch-from">
+                <svg class="btn-ico" aria-hidden="true"><use href="#i-watch"></use></svg>
+                <span data-i18n="toolbar.autoPreview">Preview automático</span>
+              </button>
+            </div>
+          </details>
+        </div>
+        <details class="export-panel">
+          <summary>
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-link"></use></svg>
+            <span data-i18n="topbar.share">Compartilhar</span>
+          </summary>
+          <div class="export-panel-body">
+            <p class="share-expiry-note" data-i18n="share.expiresNote">Este link fica no ar por 7 dias a partir da publicação. Atualizar o tour não prolonga o prazo.</p>
+            <button type="button" class="export-option" id="btn-share-publish">
+              <strong data-i18n="share.linkTitle">Link do preview</strong>
+              <span data-i18n="share.linkDesc">Endereço só para ver o tour — sem editor.</span>
+            </button>
+            <div class="share-link-actions" id="share-link-actions" hidden>
+              <div class="share-link-meta">
+                <strong data-i18n="share.linkTitle">Link do preview</strong>
+                <span data-i18n="share.linkReady">Link publicado</span>
+                <a class="share-link-open" id="share-link-open" href="#" target="_blank" rel="noopener noreferrer" data-i18n="share.openPreview" data-i18n-title="share.openPreview" title="Abrir preview">Abrir preview</a>
+              </div>
+              <div class="share-link-row">
+                <button type="button" class="btn btn-sm btn-icon" id="btn-share-copy" title="Copiar" aria-label="Copiar" data-i18n-title="share.copy" data-i18n-aria="share.copy">
+                  <svg class="btn-ico" aria-hidden="true"><use href="#i-copy"></use></svg>
+                </button>
+                <button type="button" class="btn btn-sm btn-icon" id="btn-share-update" title="Atualizar" aria-label="Atualizar" data-i18n-title="share.update" data-i18n-aria="share.update">
+                  <svg class="btn-ico" aria-hidden="true"><use href="#i-restart"></use></svg>
+                </button>
+                <button type="button" class="btn btn-sm btn-icon" id="btn-share-revoke" title="Revogar" aria-label="Revogar" data-i18n-title="share.revoke" data-i18n-aria="share.revoke">
+                  <svg class="btn-ico" aria-hidden="true"><use href="#i-trash"></use></svg>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="export-option" id="btn-export-html">
+              <strong data-i18n="export.htmlTitle">HTML navegável</strong>
+              <span data-i18n="export.htmlDesc">Tour em um arquivo para percorrer os passos ou assistir no navegador.</span>
+            </button>
+            <button type="button" class="export-option" id="btn-export-video">
+              <strong data-i18n="export.videoTitle">Vídeo MP4</strong>
+              <span data-i18n="export.videoDesc">MP4 para enviar no Slack, e-mail ou WhatsApp.</span>
+            </button>
+            <button type="button" class="export-option" id="btn-export-pdf">
+              <strong data-i18n="export.pdfTitle">PDF</strong>
+              <span data-i18n="export.pdfDesc">Guia para imprimir ou salvar como PDF.</span>
+            </button>
+            <button type="button" class="export-option" id="btn-export-json">
+              <strong data-i18n="export.jsonTitle">JSON</strong>
+              <span data-i18n="export.jsonDesc">Backup para reimportar neste editor.</span>
+            </button>
+          </div>
+        </details>
+      </div>
+      <div class="topbar-actions" id="topbar-actions-library">
+        <button type="button" class="btn btn-ghost" id="btn-capture-desktop-lib" hidden>
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-camera"></use></svg>
+          <span data-i18n="topbar.capture">Capturar</span>
+        </button>
+        <button type="button" class="btn btn-ghost" id="btn-import-library">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-import"></use></svg>
+          <span data-i18n="topbar.import">Importar</span>
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-new-project">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-plus"></use></svg>
+          <span data-i18n="topbar.newProject">Novo projeto</span>
+        </button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+      </div>
+      <button type="button" class="btn btn-ghost btn-icon topbar-appearance" id="btn-appearance" title="Seguindo o sistema" aria-label="Aparência: Sistema">
+        <svg class="btn-ico" aria-hidden="true"><use id="btn-appearance-icon" href="#i-appearance"></use></svg>
+      </button>
+      <details class="more-panel" id="more-panel" hidden>
+        <summary class="btn btn-ghost" aria-label="Mais" data-i18n-aria="topbar.more">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-more"></use></svg>
+          <span data-i18n="topbar.more">Mais</span>
+        </summary>
+        <div class="more-panel-body">
+          <div class="more-row topbar-appearance">
+            <label class="locale-select">
+              <span class="visually-hidden" data-i18n="locale.label">Idioma</span>
+              <select id="locale-select" data-i18n-aria="locale.label" aria-label="Idioma">
+                <option value="pt">PT</option>
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+              </select>
+            </label>
+          </div>
+          <div class="more-editor-only" id="more-editor-only" hidden>
+            <details class="more-section theme-panel" id="narration-panel">
+              <summary>
+                <svg class="btn-ico" aria-hidden="true"><use href="#i-settings"></use></svg>
+                <span data-i18n="topbar.settings">Ajustes</span>
+              </summary>
+              <div class="more-section-body theme-panel-body theme-panel-wide">
+                <p class="theme-section-label" data-i18n="topbar.narration">Narração</p>
+                <label class="checkbox">
+                  <input type="checkbox" id="narration-enabled" checked />
+                  <span data-i18n="narration.speakCaption">Falar no avanço automático</span>
+                </label>
+                <label><span data-i18n="narration.voice">Voz</span>
+                  <select id="narration-voice"></select>
+                </label>
+                <label><span data-i18n="narration.rate">Velocidade</span>
+                  <input type="range" id="narration-rate" min="0.7" max="1.4" step="0.05" value="1" />
+                  <span id="narration-rate-label">1.0×</span>
+                </label>
+                <label><span data-i18n="narration.defaultHold">Pausa padrão (s)</span>
+                  <input type="number" id="playback-default-hold" min="1" max="120" step="1" value="6" />
+                </label>
+                <details class="settings-fold" id="settings-tts">
+                  <summary data-i18n="narration.kokoroTitle">Kokoro TTS (local)</summary>
+                  <div class="settings-fold-body">
+                    <p class="props-meta" id="kokoro-status" role="status" aria-live="polite" data-i18n="kokoro.localHint">A voz é gerada no dispositivo. O modelo (~95 MB) e o fonemizador local (~18 MB) são baixados no primeiro uso e ficam em cache.</p>
+                    <button type="button" class="btn btn-primary" id="btn-generate-all-audio" data-i18n="kokoro.generateAll">Gerar áudio de todos os passos</button>
+                    <button type="button" class="btn btn-ghost" id="btn-cancel-batch-audio" data-i18n="kokoro.cancelBatch" hidden>Cancelar geração</button>
+                  </div>
+                </details>
+                <details class="settings-fold" id="settings-llm">
+                  <summary data-i18n="llm.section">Inteligência</summary>
+                  <div class="settings-fold-body">
+                    <p class="props-meta" id="llm-status" data-i18n="llm.statusHint">Modelo com visão · só neste navegador</p>
+                    <label><span data-i18n="llm.provider">Provedor</span>
+                      <select id="llm-provider">
+                        <option value="openrouter" selected>OpenRouter</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="custom" data-i18n="llm.providerCustom">URL personalizada</option>
+                      </select>
+                    </label>
+                    <label id="wrap-llm-base" hidden><span data-i18n="llm.baseUrl">URL base</span>
+                      <input type="url" id="llm-base-url" autocomplete="off" spellcheck="false" placeholder="https://…" />
+                    </label>
+                    <label><span data-i18n="llm.model">Modelo</span>
+                      <input type="text" id="llm-model" list="llm-model-list" autocomplete="off" spellcheck="false" value="deepseek/deepseek-v4.1-flash" />
+                      <datalist id="llm-model-list"></datalist>
+                    </label>
+                    <div class="settings-key-row">
+                      <form class="settings-key-form" autocomplete="off" onsubmit="return false">
+                        <input
+                          type="text"
+                          id="llm-key"
+                          class="settings-secret"
+                          name="trackdoc-llm-api-key"
+                          autocomplete="off"
+                          autocorrect="off"
+                          autocapitalize="off"
+                          spellcheck="false"
+                          data-1p-ignore="true"
+                          data-lpignore="true"
+                          data-bwignore="true"
+                          data-form-type="other"
+                          placeholder="sk-…"
+                          aria-label="Chave da API"
+                          data-i18n-aria="narration.apiKey"
+                        />
+                      </form>
+                      <div class="settings-actions">
+                        <button type="button" class="btn btn-sm btn-icon" id="btn-llm-save" title="Salvar" aria-label="Salvar" data-i18n-title="narration.save" data-i18n-aria="narration.save">
+                          <svg class="btn-ico" aria-hidden="true"><use href="#i-save"></use></svg>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-icon" id="btn-llm-clear" hidden title="Remover" aria-label="Remover" data-i18n-title="narration.remove" data-i18n-aria="narration.remove">
+                          <svg class="btn-ico" aria-hidden="true"><use href="#i-trash"></use></svg>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-icon" id="btn-llm-list-models" title="Listar modelos" aria-label="Listar modelos" data-i18n-title="llm.listModels" data-i18n-aria="llm.listModels">
+                          <svg class="btn-ico" aria-hidden="true"><use href="#i-list"></use></svg>
+                        </button>
+                        <a class="btn btn-sm btn-icon" id="link-llm-signup" href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" title="Obter chave" aria-label="Obter chave" data-i18n-title="narration.getKey" data-i18n-aria="narration.getKey">
+                          <svg class="btn-ico" aria-hidden="true"><use href="#i-key"></use></svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </details>
+            <details class="more-section theme-panel" id="theme-panel">
+              <summary>
+                <svg class="btn-ico" aria-hidden="true"><use href="#i-palette"></use></svg>
+                <span data-i18n="topbar.themeGuide">Tema do guia</span>
+              </summary>
+              <div class="more-section-body theme-panel-body theme-panel-wide">
+                <p class="theme-section-label" data-i18n="theme.presets">Presets</p>
+                <div class="theme-presets" id="theme-presets"></div>
+                <p class="theme-section-label" data-i18n="theme.mine">Meus temas</p>
+                <div class="theme-customs" id="theme-customs"></div>
+                <div class="theme-custom-actions">
+                  <button type="button" class="btn btn-sm" id="btn-save-theme">
+                    <svg class="btn-ico" aria-hidden="true"><use href="#i-save"></use></svg>
+                    <span data-i18n="theme.save">Salvar tema</span>
+                  </button>
+                  <button type="button" class="btn btn-sm" id="btn-dup-theme">
+                    <svg class="btn-ico" aria-hidden="true"><use href="#i-copy"></use></svg>
+                    <span data-i18n="theme.duplicate">Duplicar selecionado</span>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-danger" id="btn-del-theme" hidden>
+                    <svg class="btn-ico" aria-hidden="true"><use href="#i-trash"></use></svg>
+                    <span data-i18n="theme.delete">Excluir tema</span>
+                  </button>
+                </div>
+                <hr class="theme-divider" />
+                <p class="theme-section-label" data-i18n="theme.colors">Cores</p>
+                <label><span data-i18n="theme.accent">Accent</span> <input type="color" id="theme-accent" data-theme-key="accent" /></label>
+                <label><span data-i18n="theme.overlay">Overlay</span> <input type="color" id="theme-overlay" data-theme-key="overlay" /></label>
+                <label><span data-i18n="theme.popoverBg">Popover BG</span> <input type="color" id="theme-popoverBg" data-theme-key="popoverBg" /></label>
+                <label><span data-i18n="theme.titleColor">Título</span> <input type="color" id="theme-title" data-theme-key="title" /></label>
+                <label><span data-i18n="theme.textColor">Texto</span> <input type="color" id="theme-text" data-theme-key="text" /></label>
+                <label><span data-i18n="theme.buttonColor">Botão</span> <input type="color" id="theme-button" data-theme-key="button" /></label>
+                <label><span data-i18n="theme.hotspot">Hotspot</span> <input type="color" id="theme-hotspot" data-theme-key="hotspot" /></label>
+              </div>
+            </details>
+          </div>
+          <button type="button" class="more-item" data-tally-open="81OY5O" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="flash" data-tally-auto-close="0">
+            <span data-i18n="topbar.feedback">Feedback</span>
+          </button>
+          <a class="more-item" id="btn-help" href="ajuda.html" target="_blank" rel="noopener noreferrer">
+            <span data-i18n="topbar.help">Ajuda</span>
+          </a>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <div
+    class="boot-splash"
+    id="boot-splash"
+    role="status"
+    aria-busy="true"
+    aria-live="polite"
+  >
+    <p class="boot-splash-brand" aria-hidden="true"><img src="trackdocs-logo.svg" alt="TrackDoc" /></p>
+    <p class="boot-splash-text" data-i18n="boot.loading">Carregando…</p>
+    <div class="boot-progress" aria-hidden="true">
+      <span class="boot-progress-bar"></span>
+    </div>
+  </div>
+
+  <aside class="ext-banner" id="ext-banner" hidden>
+    <p data-i18n="extBanner.text">Para gravar as telas do produto, instale a extensão de captura.</p>
+    <div class="ext-banner-actions">
+      <a class="btn btn-sm btn-primary" href="https://chromewebstore.google.com/detail/bogjjfmcceccnepkpijiohglllbgbofd" target="_blank" rel="noopener noreferrer">
+        <span data-i18n="extBanner.install">Instalar no Chrome</span>
+      </a>
+      <a class="btn btn-sm" href="ajuda.html#gravar">
+        <span data-i18n="extBanner.help">Como capturar</span>
+      </a>
+      <button type="button" class="btn btn-sm" id="ext-banner-dismiss" data-i18n="extBanner.dismiss">Não mostrar de novo</button>
+    </div>
+  </aside>
+
+  <main id="view-help" class="view view-help" hidden>
+    <iframe id="help-frame" title="Como usar" data-i18n-title="help.iframeTitle"></iframe>
+  </main>
+
+  <main id="view-library" class="view view-library">
+    <div class="library-header">
+      <div>
+        <h1 data-i18n="library.title">Projetos</h1>
+      </div>
+    </div>
+    <div class="library-grid" id="library-grid"></div>
+    <p class="library-empty" id="library-empty" hidden data-i18n="library.empty">Nenhum guia ainda. Crie o primeiro ou importe um arquivo.</p>
+  </main>
+
+  <main id="view-editor" class="view view-editor" hidden>
+    <aside class="filmstrip-panel" id="filmstrip-panel">
+      <div class="filmstrip-header">
+        <span class="filmstrip-multi-hint" data-i18n="filmstrip.multiHint">⌘/Ctrl+clique ou Shift para selecionar vários</span>
+      </div>
+      <div class="filmstrip" id="filmstrip" aria-label="Passos do demo" data-i18n-aria="filmstrip.aria"></div>
+    </aside>
+
+    <section class="canvas-wrap">
+      <div class="canvas-toolbar" role="toolbar" aria-label="Edição" data-i18n-aria="toolbar.aria">
+        <div class="toolbar-group" role="group" aria-label="Adicionar" data-i18n-aria="toolbar.groupAdd">
+          <button type="button" class="btn btn-sm" id="btn-add-scene">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-layers"></use></svg>
+            <span data-i18n="toolbar.scene">Cena</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-add-step">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-plus"></use></svg>
+            <span data-i18n="toolbar.step">Passo</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-add-slide">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-slide"></use></svg>
+            <span data-i18n="toolbar.slide">Slide</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-add-images">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-image"></use></svg>
+            <span data-i18n="toolbar.images">Imagens</span>
+          </button>
+        </div>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group" role="group" aria-label="Editar" data-i18n-aria="toolbar.groupEdit">
+          <button type="button" class="btn btn-sm" id="btn-dup-step" title="Duplicar (⌘D)" data-i18n-title="toolbar.duplicateTitle">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-duplicate"></use></svg>
+            <span data-i18n="toolbar.duplicate">Duplicar</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-copy-step" title="Copiar (⌘C)" data-i18n-title="toolbar.copyTitle">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-copy"></use></svg>
+            <span data-i18n="toolbar.copy">Copiar</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-paste-step" title="Colar (⌘V)" data-i18n-title="toolbar.pasteTitle">
+            <svg class="btn-ico" aria-hidden="true"><use href="#i-paste"></use></svg>
+            <span data-i18n="toolbar.paste">Colar</span>
+          </button>
+        </div>
+      </div>
+      <p class="present-hint" id="present-chrome" hidden data-i18n="present.escHint">Clique fora para parar · Esc sai</p>
+      <button type="button" class="present-close" id="present-close" hidden aria-label="Fechar" data-i18n-aria="present.close">
+        <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+      </button>
+      <p class="rotate-hint" id="rotate-hint" hidden data-i18n="present.rotateHint">Gire o celular para ver a tela inteira</p>
+      <input type="file" id="images-file" accept="image/*" multiple hidden />
+      <div class="canvas-stage" id="canvas-stage">
+        <div class="canvas-empty" id="canvas-empty" hidden>
+          <h2 data-i18n="canvas.emptyTitle">Projeto vazio</h2>
+          <p data-i18n="canvas.emptyLead">Envie capturas de tela ou adicione um passo/slide para começar.</p>
+          <div class="canvas-empty-actions">
+            <button type="button" class="btn btn-primary" id="btn-empty-images">
+              <svg class="btn-ico" aria-hidden="true"><use href="#i-image"></use></svg>
+              <span data-i18n="canvas.uploadShots">Enviar capturas</span>
+            </button>
+            <button type="button" class="btn" id="btn-empty-step">
+              <svg class="btn-ico" aria-hidden="true"><use href="#i-plus"></use></svg>
+              <span data-i18n="toolbar.step">Passo</span>
+            </button>
+            <button type="button" class="btn" id="btn-empty-slide">
+              <svg class="btn-ico" aria-hidden="true"><use href="#i-slide"></use></svg>
+              <span data-i18n="toolbar.slide">Slide</span>
+            </button>
+          </div>
+        </div>
+        <div class="canvas-frame" id="canvas-frame">
+          <img id="canvas-image" alt="Captura da tela" data-i18n-alt="canvas.imageAlt" hidden />
+          <div class="image-missing" id="canvas-missing" hidden data-i18n="canvas.missing">Tela sem imagem — escolha outra no painel à direita.</div>
+          <div class="slide-card" id="canvas-slide" hidden>
+            <button type="button" class="slide-card-close" id="canvas-slide-close" aria-label="Fechar" data-i18n-aria="canvas.close">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <p class="slide-kicker" id="canvas-slide-kicker"></p>
+            <h2 id="canvas-slide-title"></h2>
+            <p id="canvas-slide-body"></p>
+            <button type="button" class="slide-card-play" id="canvas-slide-play" aria-label="Reproduzir" data-i18n-aria="canvas.play">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            </button>
+          </div>
+          <div class="hotspot" id="hotspot" hidden>
+            <span class="hotspot-label" data-i18n="canvas.hotspot">destaque</span>
+            <i class="hotspot-handle nw" data-handle="nw"></i>
+            <i class="hotspot-handle ne" data-handle="ne"></i>
+            <i class="hotspot-handle sw" data-handle="sw"></i>
+            <i class="hotspot-handle se" data-handle="se"></i>
+          </div>
+          <div class="click-point" id="click-point" hidden title="Ponto do clique simulado — arraste" data-i18n-title="canvas.clickTitle">
+            <span class="click-point-ring"></span>
+            <span class="click-point-dot"></span>
+            <span class="click-point-label">click</span>
+          </div>
+          <div class="click-fx" id="editor-click-fx" hidden aria-hidden="true">
+            <span class="click-fx-ring"></span>
+            <span class="click-fx-ring click-fx-ring-2"></span>
+            <span class="click-fx-burst"></span>
+          </div>
+          <div class="sim-cursor" id="editor-sim-cursor" hidden></div>
+          <div class="caption-bar" id="canvas-caption" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="props" id="props-panel">
+      <div class="props-header">
+        <h2 data-i18n="props.step">Passo</h2>
+      </div>
+      <div class="topbar-modes type-toggle" id="prop-type" role="radiogroup" aria-label="Tipo" data-i18n-aria="props.type">
+        <button type="button" class="mode-btn" data-value="slide" aria-pressed="false">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-slide"></use></svg>
+          <span data-i18n="props.slide">Slide</span>
+        </button>
+        <button type="button" class="mode-btn" data-value="screen" aria-pressed="false">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-image"></use></svg>
+          <span data-i18n="props.screen">Tela</span>
+        </button>
+      </div>
+      <div id="wrap-image" class="image-picker-field">
+        <span class="field-label" data-i18n="props.image">Imagem</span>
+        <button type="button" class="image-pick-btn" id="btn-pick-image">
+          <img id="prop-image-thumb" alt="" hidden />
+          <span id="prop-image-name" data-i18n="props.chooseImage">Escolher imagem…</span>
+        </button>
+        <select id="prop-image" hidden></select>
+      </div>
+      <button
+        type="button"
+        class="btn btn-sm btn-generate-copy"
+        id="btn-generate-copy"
+        title="Gerar título, descrição e narração"
+        aria-label="Gerar título, descrição e narração"
+        data-i18n-title="props.generateCopy"
+        data-i18n-aria="props.generateCopy"
+      >
+        <svg class="btn-ico btn-ai-spark" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+        <span id="btn-generate-copy-label" data-i18n="props.generateCopyShort">Gerar textos</span>
+      </button>
+      <label><span data-i18n="props.title">Título</span>
+        <input type="text" id="prop-title" />
+      </label>
+      <label><span data-i18n="props.description">Descrição</span>
+        <textarea id="prop-description" rows="3"></textarea>
+      </label>
+      <div class="caption-block">
+        <label><span data-i18n="props.caption">Narração</span>
+          <textarea id="prop-caption" rows="3" placeholder="Texto da narração (opcional no slide)" data-i18n-placeholder="props.captionPlaceholder"></textarea>
+        </label>
+        <label class="checkbox" id="wrap-show-caption" hidden>
+          <input type="checkbox" id="prop-show-caption" checked />
+          <span data-i18n="props.showCaption">Mostrar texto no slide</span>
+        </label>
+        <div class="caption-audio-actions" id="caption-audio-actions" hidden>
+          <button type="button" class="btn btn-sm btn-generate-caption" id="btn-generate-caption" hidden data-i18n-aria="props.generateAudio" aria-label="Gerar áudio">
+            <svg class="btn-ico btn-ai-spark" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+            <span id="btn-generate-caption-label" data-i18n="props.generateAudio">Gerar áudio</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-upload-caption" hidden data-i18n="props.uploadAudio">Enviar áudio</button>
+          <button type="button" class="btn btn-sm" id="btn-clear-caption-audio" hidden data-i18n="props.removeAudio">Remover</button>
+          <input type="file" id="caption-audio-file" accept="audio/*,.mp3,.ogg,.wav,.m4a,.aac,.webm" hidden />
+        </div>
+        <div class="caption-player" id="caption-player" hidden>
+          <button type="button" class="caption-player-toggle" id="btn-caption-play" aria-label="Reproduzir" data-i18n-aria="canvas.play" aria-pressed="false" disabled>
+            <svg class="caption-player-icon caption-player-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            <svg class="caption-player-icon caption-player-icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zm6.8 0H17v14h-3.2z" fill="currentColor"/></svg>
+          </button>
+          <input type="range" id="caption-seek" class="caption-seek" min="0" max="1000" value="0" step="1" aria-label="Avanço do áudio" data-i18n-aria="props.audioSeek" disabled />
+          <button type="button" class="caption-player-rate" id="btn-caption-rate" aria-label="Velocidade de reprodução, 1×">1×</button>
+          <div class="caption-player-times">
+            <span id="caption-time">0:00</span>
+            <span id="caption-duration">0:00</span>
+          </div>
+        </div>
+        <p class="props-meta" id="caption-audio-status" hidden data-i18n="props.noAudio">Sem áudio neste passo.</p>
+      </div>
+      <label class="checkbox" id="wrap-simulate">
+        <input type="checkbox" id="prop-simulate-click" checked />
+        <span data-i18n="props.simulateClick">Simular clique ao avançar</span>
+      </label>
+      <label class="checkbox" id="wrap-zoom">
+        <input type="checkbox" id="prop-zoom-highlight" />
+        <span data-i18n="props.zoomHighlight">Ampliar destaque</span>
+      </label>
+      <div class="hold-field">
+        <label><span data-i18n="props.hold">Temporizador (s)</span>
+          <input type="number" id="prop-hold" min="1" max="120" step="1" placeholder="padrão" data-i18n-placeholder="props.holdDefault" />
+        </label>
+        <p class="props-meta" id="prop-hold-hint" hidden></p>
+      </div>
+      <div class="choice-field" id="wrap-side">
+        <span class="field-label" id="label-side" data-i18n="props.side">Lado</span>
+        <div class="icon-choices" id="prop-side" role="radiogroup" aria-label="Lado" data-i18n-aria="props.side">
+          <button type="button" class="icon-choice" data-scope="screen" data-value="top" title="Em cima" aria-label="Em cima" data-i18n-title="props.top" data-i18n-aria="props.top" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-side-top"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-scope="screen" data-value="right" title="Direita" aria-label="Direita" data-i18n-title="props.right" data-i18n-aria="props.right" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-side-right"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-scope="screen" data-value="bottom" title="Embaixo" aria-label="Embaixo" data-i18n-title="props.bottom" data-i18n-aria="props.bottom" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-side-bottom"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-scope="screen" data-value="left" title="Esquerda" aria-label="Esquerda" data-i18n-title="props.left" data-i18n-aria="props.left" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-side-left"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-scope="slide" data-value="top" title="Em cima" aria-label="Em cima" data-i18n-title="props.top" data-i18n-aria="props.top" aria-pressed="false" hidden>
+            <svg aria-hidden="true"><use href="#i-valign-top"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-scope="slide" data-value="center" title="Centro" aria-label="Centro" data-i18n-title="props.center" data-i18n-aria="props.center" aria-pressed="false" hidden>
+            <svg aria-hidden="true"><use href="#i-valign-center"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-scope="slide" data-value="bottom" title="Embaixo" aria-label="Embaixo" data-i18n-title="props.bottom" data-i18n-aria="props.bottom" aria-pressed="false" hidden>
+            <svg aria-hidden="true"><use href="#i-valign-bottom"></use></svg>
+          </button>
+        </div>
+      </div>
+      <div class="choice-field" id="wrap-align">
+        <span class="field-label" id="label-align" data-i18n="props.align">Alinhamento</span>
+        <div class="icon-choices" id="prop-align" role="radiogroup" aria-label="Alinhamento" data-i18n-aria="props.align">
+          <button type="button" class="icon-choice" data-value="start" title="Início" aria-label="Início" data-i18n-title="props.start" data-i18n-aria="props.start" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-align-start"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-value="center" title="Centro" aria-label="Centro" data-i18n-title="props.center" data-i18n-aria="props.center" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-align-center"></use></svg>
+          </button>
+          <button type="button" class="icon-choice" data-value="end" title="Fim" aria-label="Fim" data-i18n-title="props.end" data-i18n-aria="props.end" aria-pressed="false">
+            <svg aria-hidden="true"><use href="#i-align-end"></use></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <dialog class="studio-modal" id="modal-delete-project">
+    <form method="dialog" id="form-delete-project" class="studio-modal-body">
+      <h3 data-i18n="modal.deleteProject">Excluir projeto</h3>
+      <p class="delete-project-lead">
+        <span data-i18n="modal.deleteLeadBefore">Isto apaga </span><strong id="delete-project-name-label"></strong><span data-i18n="modal.deleteLeadAfter"> deste navegador. Não dá para desfazer.</span>
+      </p>
+      <label class="checkbox delete-project-backup">
+        <input type="checkbox" id="delete-project-backup" checked />
+        <span data-i18n="modal.backupJson">Baixar backup JSON antes de excluir</span>
+      </label>
+      <label><span data-i18n="modal.confirmName">Digite o nome do projeto para confirmar</span>
+        <input type="text" id="delete-project-confirm" required autocomplete="off" spellcheck="false" />
+      </label>
+      <p class="props-meta delete-project-hint" id="delete-project-hint" hidden data-i18n="modal.nameMismatch">
+        O nome não confere.
+      </p>
+      <input type="hidden" id="delete-project-id" />
+      <input type="hidden" id="delete-project-expected" />
+      <div class="studio-modal-actions">
+        <button type="button" class="btn" id="btn-cancel-delete-project">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+          <span data-i18n="modal.cancel">Cancelar</span>
+        </button>
+        <button type="submit" class="btn btn-danger" id="btn-confirm-delete-project" disabled>
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+          <span data-i18n="modal.delete">Excluir</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="studio-modal" id="modal-new-project">
+    <form method="dialog" id="form-new-project" class="studio-modal-body">
+      <h3 data-i18n="modal.newProject">Novo projeto</h3>
+      <label><span data-i18n="modal.name">Nome</span>
+        <input type="text" id="new-project-name" placeholder="Ex.: Demo onboarding" data-i18n-placeholder="modal.newProjectPlaceholder" required maxlength="80" />
+      </label>
+      <p class="theme-section-label" data-i18n="modal.initialTheme">Tema inicial</p>
+      <div class="theme-presets" id="new-project-themes"></div>
+      <div class="studio-modal-actions">
+        <button type="button" class="btn" id="btn-cancel-new-project" value="cancel">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+          <span data-i18n="modal.cancel">Cancelar</span>
+        </button>
+        <button type="submit" class="btn btn-primary" id="btn-confirm-new-project">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-plus"></use></svg>
+          <span data-i18n="modal.create">Criar</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="studio-modal" id="modal-save-theme">
+    <form method="dialog" id="form-save-theme" class="studio-modal-body">
+      <h3 data-i18n="modal.saveTheme">Salvar tema</h3>
+      <label><span data-i18n="modal.name">Nome</span>
+        <input type="text" id="save-theme-name" placeholder="Ex.: Marca cliente X" data-i18n-placeholder="modal.themePlaceholder" required maxlength="60" />
+      </label>
+      <div class="studio-modal-actions">
+        <button type="button" class="btn" id="btn-cancel-save-theme">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+          <span data-i18n="modal.cancel">Cancelar</span>
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-save"></use></svg>
+          <span data-i18n="modal.save">Salvar</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="studio-modal" id="modal-scene">
+    <form method="dialog" id="form-scene" class="studio-modal-body">
+      <h3 id="modal-scene-title" data-i18n="modal.scene">Cena</h3>
+      <label><span data-i18n="modal.name">Nome</span>
+        <input type="text" id="scene-name" required maxlength="60" placeholder="Ex.: Editor" data-i18n-placeholder="modal.scenePlaceholder" />
+      </label>
+      <input type="hidden" id="scene-mode" value="create" />
+      <input type="hidden" id="scene-number" value="" />
+      <div class="studio-modal-actions">
+        <button type="button" class="btn" id="btn-cancel-scene">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+          <span data-i18n="modal.cancel">Cancelar</span>
+        </button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-scene">
+          <svg class="btn-ico" aria-hidden="true"><use href="#i-save"></use></svg>
+          <span data-i18n="modal.save">Salvar</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <dialog class="image-modal" id="image-modal">
+    <div class="image-modal-header">
+      <h3 data-i18n="modal.pickImage">Escolher imagem</h3>
+      <button type="button" class="btn btn-sm" id="btn-close-image-modal">
+        <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+        <span data-i18n="modal.close">Fechar</span>
+      </button>
+    </div>
+    <div class="image-modal-actions">
+      <button type="button" class="btn btn-primary" id="btn-upload-in-modal">
+        <svg class="btn-ico" aria-hidden="true"><use href="#i-import"></use></svg>
+        <span data-i18n="modal.uploadComputer">Enviar do computador</span>
+      </button>
+      <input type="search" id="image-search" placeholder="Filtrar por nome…" data-i18n-placeholder="modal.filterImages" />
+    </div>
+    <p class="image-drop-hint" data-i18n="modal.dropHint">Arraste imagens para esta janela ou cole</p>
+    <div class="image-grid" id="image-grid"></div>
+  </dialog>
+
+  <div class="export-overlay" id="export-overlay" hidden>
+    <div class="export-overlay-card">
+      <p class="export-overlay-title" id="export-overlay-title" data-i18n="export.overlay">Exportando…</p>
+      <p class="export-overlay-status" id="export-overlay-status"></p>
+      <canvas class="export-preview" id="export-preview" width="1920" height="1080" hidden></canvas>
+      <button type="button" class="btn btn-ghost" id="btn-export-cancel" hidden>
+        <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
+        <span data-i18n="modal.cancel">Cancelar</span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="project-open-overlay"
+    id="project-open-overlay"
+    hidden
+    role="status"
+    aria-busy="true"
+    aria-live="polite"
+  >
+    <div class="project-open-overlay-card">
+      <p class="project-open-overlay-text" data-i18n="boot.loading">Carregando…</p>
+      <div class="boot-progress" aria-hidden="true">
+        <span class="boot-progress-bar"></span>
+      </div>
+    </div>
+  </div>
+
+  <svg xmlns="http://www.w3.org/2000/svg" hidden aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </symbol>
+    <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
+    </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+    </symbol>
+    <symbol id="i-paste" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+    </symbol>
+    <symbol id="i-duplicate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/>
+    </symbol>
+    <symbol id="i-import" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>
+    </symbol>
+    <symbol id="i-export" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>
+    </symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/>
+    </symbol>
+    <symbol id="i-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>
+    </symbol>
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="15" r="4"/><path d="m10.7 12.3 8.8-8.8"/><path d="M17 5.5 19.5 8"/><path d="M15 7.5 17.5 10"/>
+    </symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    </symbol>
+    <symbol id="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>
+    </symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+    </symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/>
+    </symbol>
+    <symbol id="i-appearance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 3v18"/>
+      <path d="M12 3a9 9 0 0 1 0 18" fill="currentColor" stroke="none" opacity="0.35"/>
+    </symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a10 10 0 1 0 10 10c0-1.5-1.2-2-2.5-2H16a2 2 0 0 0-2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 4 4 0 0 1 4-4h.5"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14" cy="7" r="1"/>
+    </symbol>
+    <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+    </symbol>
+    <symbol id="i-slide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/>
+    </symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/>
+    </symbol>
+    <symbol id="i-side-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 4h8"/><rect x="5" y="8" width="14" height="11" rx="1.5"/>
+    </symbol>
+    <symbol id="i-side-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="5" width="12" height="14" rx="1.5"/><path d="M20 8v8"/>
+    </symbol>
+    <symbol id="i-side-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="5" width="14" height="11" rx="1.5"/><path d="M8 20h8"/>
+    </symbol>
+    <symbol id="i-side-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8v8"/><rect x="8" y="5" width="12" height="14" rx="1.5"/>
+    </symbol>
+    <symbol id="i-valign-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M7 7h10M7 11h7"/>
+    </symbol>
+    <symbol id="i-valign-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M7 10h10M7 14h7"/>
+    </symbol>
+    <symbol id="i-valign-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M7 13h10M7 17h7"/>
+    </symbol>
+    <symbol id="i-align-start" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M4 6h10M4 12h16M4 18h8"/>
+    </symbol>
+    <symbol id="i-align-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M7 6h10M4 12h16M8 18h8"/>
+    </symbol>
+    <symbol id="i-align-end" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M10 6h10M4 12h16M12 18h8"/>
+    </symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m12 2 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>
+    </symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/>
+    </symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m7 4 12 8-12 8z"/>
+    </symbol>
+    <symbol id="i-watch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/>
+    </symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>
+    </symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="6" width="12" height="12" rx="1"/>
+    </symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/>
+      <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/>
+      <path d="M5 15l.6 1.6L7.2 17l-1.6.6L5 19.2l-.6-1.6L2.8 17l1.6-.6L5 15z"/>
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>
+    </symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
+    </symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m15 14 5-5-5-5" />
+      <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18M6 6l12 12"/>
+    </symbol>
+  </svg>
+
+  <script src="a/10/vendor/driver/driver.js.iife.js"></script>
+  <script src="a/10/vendor/motion/motion.js"></script>
+  <script type="module" src="a/10/js/app.js"></script>
+  <script type="module" src="a/10/js/motionFx.js"></script>
+</body>
+</html>

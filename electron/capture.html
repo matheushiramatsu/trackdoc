@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="doc.title.capture">Capturar</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f5f5f5;
+      color: #191919;
+    }
+    .bar {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d2e7fc;
+      background: #ffffff;
+    }
+    input[type="url"] {
+      flex: 1;
+      min-width: 0;
+      height: 36px;
+      border: 1px solid #d2e7fc;
+      border-radius: 4px;
+      padding: 0 10px;
+      font: inherit;
+    }
+    button {
+      height: 36px;
+      border-radius: 4px;
+      border: 1px solid #d2e7fc;
+      background: #f5f5f5;
+      color: #36405e;
+      font: inherit;
+      font-weight: 600;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+    button.primary {
+      background: #1732ff;
+      border-color: #1732ff;
+      color: #fff;
+    }
+    button.danger {
+      background: #fff;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+    .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 160px;
+      max-width: 220px;
+    }
+    .count { font-weight: 700; color: #1732ff; font-size: 13px; }
+    .status { font-size: 11px; color: #36405e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .status.is-error { color: #dc2626; }
+    .locale-select select {
+      height: 36px;
+      border: 1px solid #d2e7fc;
+      border-radius: 4px;
+      padding: 0 8px;
+      font: inherit;
+      font-weight: 600;
+      background: #fff;
+      color: #36405e;
+    }
+    .hint {
+      position: absolute;
+      left: 12px;
+      top: 68px;
+      font-size: 11px;
+      color: #36405e;
+      pointer-events: none;
+    }
+  </style>
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("ns-locale");
+        var langs = navigator.languages || (navigator.language ? [navigator.language] : []);
+        var pick = stored;
+        if (!pick) {
+          for (var i = 0; i < langs.length; i++) {
+            var p = String(langs[i] || "").toLowerCase().split("-")[0];
+            if (p === "pt" || p === "es" || p === "en") { pick = p; break; }
+          }
+        }
+        if (pick !== "pt" && pick !== "es" && pick !== "en") pick = "en";
+        document.documentElement.lang = pick === "pt" ? "pt-BR" : pick;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="bar">
+    <input type="url" id="url" placeholder="https://produto.exemplo.com" data-i18n-placeholder="capture.urlPlaceholder" spellcheck="false" />
+    <button type="button" id="btn-go" data-i18n="capture.open">Abrir</button>
+    <button type="button" id="btn-start" data-i18n="capture.start">Iniciar</button>
+    <div class="meta">
+      <span class="count" id="count">0 passos</span>
+      <span class="status" id="status" data-i18n="capture.statusDefault">Só captura o que estiver nesta janela.</span>
+    </div>
+    <label class="locale-select">
+      <select id="locale-select" data-i18n-aria="locale.label" aria-label="Idioma">
+        <option value="pt">PT</option>
+        <option value="es">ES</option>
+        <option value="en">EN</option>
+      </select>
+    </label>
+    <button type="button" class="primary" id="btn-capture" data-i18n="capture.shot">Capturar</button>
+    <button type="button" class="primary" id="btn-create" data-i18n="capture.create">Criar projeto</button>
+    <button type="button" id="btn-undo" data-i18n="capture.undo">Desfazer</button>
+    <button type="button" class="danger" id="btn-cancel" data-i18n="capture.close">Fechar</button>
+  </div>
+  <p class="hint" data-i18n="capture.hint">Capturar congela a tela · clique no elemento para marcar o destaque</p>
+  <script type="module" src="capture-ui.js"></script>
+</body>
+</html>

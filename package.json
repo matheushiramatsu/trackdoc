@@ -1,0 +1,73 @@
+{
+  "name": "trackdoc",
+  "private": true,
+  "version": "0.2.1",
+  "description": "Editor e player de tours com captura de tela",
+  "license": "MIT",
+  "main": "electron/main.js",
+  "scripts": {
+    "prestart": "node scripts/copy-tts-runtime.mjs",
+    "start": "node scripts/dev-server.mjs",
+    "pretest": "node scripts/copy-tts-runtime.mjs",
+    "vercel-build": "node scripts/copy-tts-runtime.mjs",
+    "pack:extension": "node scripts/pack-extension.mjs",
+    "test": "node --test extension/lib/*.test.js scripts/*.test.js js/*.test.js electron/secret-store.test.js",
+    "desktop": "electron .",
+    "predesktop": "node scripts/copy-tts-runtime.mjs",
+    "pre-dist:desktop": "node scripts/copy-tts-runtime.mjs",
+    "dist:desktop": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "electron": "^36.4.0",
+    "electron-builder": "^26.0.12",
+    "espeak-ng": "^1.0.2",
+    "kokoro-js": "^1.2.1"
+  },
+  "build": {
+    "appId": "app.trackdoc",
+    "productName": "TrackDoc",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.html",
+      "view.html",
+      "ajuda.html",
+      "favicon.*",
+      "trackdocs-*.svg",
+      "apple-touch-icon.png",
+      "og-share.png",
+      "css/**/*",
+      "js/**/*",
+      "data/**/*",
+      "demo/**/*",
+      "vendor/**/*",
+      "extension/content.js",
+      "extension/lib/demo-payload.js",
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dir"
+      ],
+      "identity": null
+    },
+    "linux": {
+      "target": [
+        "dir"
+      ]
+    },
+    "win": {
+      "target": [
+        "dir"
+      ]
+    }
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "motion": "^14.0.0"
+  }
+}

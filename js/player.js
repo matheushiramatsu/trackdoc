@@ -1,0 +1,566 @@
+import { t } from "./i18n.js";
+import { resolveImageSrc, ensureClickPoint, bindImage, applyTheme, themeOverlayPaint } from "./store.js";
+import { createClickFxController } from "./clickFx.js";
+import { renderDemoPopoverFooter, clickDriverNext, clickDriverPrev, setPopoverHiddenForSlide } from "./popoverFooter.js";
+import { sizeSlideLikeImage, applySlideLayout } from "./slideLayout.js";
+import { computeZoomCamera, zoomCameraStyle } from "./zoomHighlight.js";
+import {
+  createNarrationController,
+  ensureNarration,
+  ensurePlayback,
+  holdMs,
+} from "./playback.js";
+import { isCompactTouch } from "./compact.js";
+
+export function createPlayer(ctx) {
+  const { getDemo, toast, getSelectedIndex, setSelectedIndex, onRequestExit, presentHintKey } = ctx;
+
+  const els = {
+    stage: document.getElementById("canvas-stage"),
+    frame: document.getElementById("canvas-frame"),
+    image: document.getElementById("canvas-image"),
+    slide: document.getElementById("canvas-slide"),
+    slideKicker: document.getElementById("canvas-slide-kicker"),
+    slideTitle: document.getElementById("canvas-slide-title"),
+    slideBody: document.getElementById("canvas-slide-body"),
+    hotspot: document.getElementById("hotspot"),
+    clickPoint: document.getElementById("click-point"),
+    clickFx: document.getElementById("editor-click-fx"),
+    cursor: document.getElementById("editor-sim-cursor"),
+    progress: null,
+    missing: document.getElementById("canvas-missing"),
+    caption: document.getElementById("canvas-caption"),
+  };
+
+  const clickFx = createClickFxController({
+    frame: els.frame,
+    hotspot: els.hotspot,
+    cursor: els.cursor,
+    clickFx: els.clickFx,
+  });
+
+  const narration = createNarrationController({ captionEl: els.caption });
+
+  let driverObj = null;
+  let activeIndex = 0;
+  let animating = false;
+  let autoplayTimer = null;
+  let autoplayEnabled = false;
+  let running = false;
+  let exitOnOutsideClick = false;
+  let suppressExitArm = false;
+
+  function presentHintEl() {
+    return document.getElementById("present-chrome");
+  }
+
+  function setPresentHint(key) {
+    const el = presentHintEl();
+    if (!el) return;
+    el.textContent = t(key);
+    el.dataset.i18n = key;
+  }
+
+  function presentStopHintKey() {
+    if (presentHintKey) return presentHintKey;
+    return isCompactTouch() ? "present.touchHint" : "present.escHint";
+  }
+
+  function presentAgainHintKey() {
+    if (presentHintKey) return presentHintKey;
+    return isCompactTouch() ? "present.touchAgainHint" : "present.clickAgainHint";
+  }
+
+  function autoplayOn() {
+    return autoplayEnabled;
+  }
+
+  function clearAutoplay() {
+    clearTimeout(autoplayTimer);
+    autoplayTimer = null;
+  }
+
+  function armAutoplay() {
+    clearAutoplay();
+    if (!autoplayOn() || !driverObj) return;
+    const demo = getDemo();
+    ensurePlayback(demo);
+    ensureNarration(demo);
+    const step = demo.steps[activeIndex];
+    if (!step) return;
+    // why: o áudio já começou em showStepVisual; aqui só esperamos para avançar
+    const speechDone = narration.whenSpeechDone();
+    const delay = holdMs(step, demo);
+    autoplayTimer = setTimeout(async () => {
+      await speechDone.catch(() => {});
+      document.querySelector(".driver-popover-next-btn")?.click();
+    }, delay);
+  }
+
+  function driverFactory() {
+    return window.driver?.js?.driver || window.driver;
+  }
+
+  function setProgress(text) {
+    if (els.progress) els.progress.textContent = text;
+  }
+
+  function isPresenting() {
+    return document.getElementById("view-editor")?.classList.contains("is-presenting");
+  }
+
+  function clearZoom({ animate = false } = {}) {
+    if (!els.frame) return;
+    if (!animate) {
+      const prev = els.frame.style.transition;
+      els.frame.style.transition = "none";
+      els.frame.style.transform = "";
+      els.frame.style.transformOrigin = "";
+      void els.frame.offsetWidth;
+      els.frame.style.transition = prev;
+    } else {
+      els.frame.style.transform = "";
+      els.frame.style.transformOrigin = "";
+    }
+    els.stage?.classList.remove("is-zooming");
+  }
+
+  function waitZoomTransition() {
+    return new Promise((resolve) => {
+      if (!els.frame) {
+        resolve();
+        return;
+      }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        els.frame.removeEventListener("transitionend", onEnd);
+        clearTimeout(timer);
+        resolve();
+      };
+      const onEnd = (e) => {
+        if (e.target !== els.frame || e.propertyName !== "transform") return;
+        finish();
+      };
+      els.frame.addEventListener("transitionend", onEnd);
+      const timer = setTimeout(finish, 850);
+    });
+  }
+
+  function refreshDriver() {
+    try {
+      driverObj?.refresh?.();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /**
+   * why: refresh() cancela o frame anterior; o tick entra depois para o recorte
+   * acompanhar o transform em vez de saltar só no fim.
+   */
+  function trackDriverDuringZoom() {
+    let stopped = false;
+    let raf = 0;
+    const tick = () => {
+      if (stopped) return;
+      refreshDriver();
+      raf = requestAnimationFrame(tick);
+    };
+    refreshDriver();
+    raf = requestAnimationFrame(tick);
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+    };
+  }
+
+  function zoomEnabled(step) {
+    return step?.type !== "slide" && step?.zoomHighlight === true && els.image && !els.image.hidden;
+  }
+
+  async function applyStepZoom(step) {
+    if (!els.frame || !els.stage) return;
+    if (!zoomEnabled(step)) {
+      const hadZoom = Boolean(els.frame.style.transform);
+      const stopTrack = hadZoom ? trackDriverDuringZoom() : null;
+      clearZoom({ animate: hadZoom });
+      if (hadZoom) await waitZoomTransition();
+      stopTrack?.();
+      refreshDriver();
+      return;
+    }
+    const imageSize = { w: els.image.clientWidth, h: els.image.clientHeight };
+    const stageSize = { w: els.stage.clientWidth, h: els.stage.clientHeight };
+    const cam = computeZoomCamera(step.hotspot, imageSize, stageSize, true);
+    const style = zoomCameraStyle(cam);
+    const nextTransform = style.transform === "none" ? "" : style.transform;
+    els.stage.classList.add("is-zooming");
+    els.frame.style.transformOrigin = style.transformOrigin;
+    if (els.frame.style.transform === nextTransform) return;
+    const stopTrack = trackDriverDuringZoom();
+    els.frame.style.transform = nextTransform;
+    await waitZoomTransition();
+    stopTrack();
+    refreshDriver();
+  }
+
+  /** Garante escala 1× para o retângulo do destaque aparecer antes do close-up. */
+  async function prepareStepCamera(step) {
+    await waitLayout();
+    if (els.frame?.style.transform) {
+      clearZoom({ animate: false });
+    }
+    // why: sem zoomHighlight limpa qualquer residual; com zoom, o close-up vem depois do driver
+    if (!zoomEnabled(step) && els.stage?.classList.contains("is-zooming")) {
+      clearZoom({ animate: false });
+    }
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function zoomAfterHighlightVisible(step) {
+    if (!zoomEnabled(step)) return;
+    // why: o driver precisa pintar o recorte em 1× antes da câmera começar a andar
+    await delay(550);
+    await applyStepZoom(step);
+    try {
+      driverObj?.refresh?.();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function showStepVisual(step, { speak = false } = {}) {
+    return new Promise((resolve) => {
+      const demo = getDemo();
+      ensureNarration(demo);
+      narration.enterStep(step, demo, { speak });
+
+      // why: ponto de edição some na apresentação; o cursor simulado cuida do clique
+      if (els.clickPoint) els.clickPoint.hidden = true;
+
+      if (step.type === "slide") {
+        els.image.hidden = true;
+        els.image.removeAttribute("src");
+        if (els.missing) els.missing.hidden = true;
+        els.slide.hidden = false;
+        els.slideKicker.textContent = t("player.scene", { n: step.scene });
+        els.slideTitle.textContent = step.popover?.title || step.label || "";
+        els.slideBody.textContent = step.popover?.description || "";
+        applySlideLayout(els.slide, step);
+        sizeSlideLikeImage(els.slide, els.stage, demo, step, resolveImageSrc);
+        // why: o editor usa [hidden]; style.display não vence o !important do CSS
+        els.hotspot.hidden = true;
+        els.hotspot.style.display = "";
+        resolve();
+        return;
+      }
+
+      els.slide.hidden = true;
+      els.hotspot.hidden = false;
+      els.hotspot.style.display = "";
+      els.hotspot.classList.add("is-previewing");
+
+      const src = resolveImageSrc(getDemo(), step.image);
+      bindImage(els.image, src, (ok) => {
+        if (els.missing) els.missing.hidden = ok;
+        if (ok) {
+          placeHotspot(step.hotspot);
+        } else {
+          els.hotspot.hidden = true;
+        }
+        resolve();
+      });
+    });
+  }
+
+  function placeHotspot(hotspot) {
+    const hs = hotspot || { x: 40, y: 40, w: 12, h: 8 };
+    const w = els.image.clientWidth;
+    const h = els.image.clientHeight;
+    els.hotspot.hidden = false;
+    els.hotspot.style.display = "";
+    els.hotspot.style.left = (hs.x / 100) * w + "px";
+    els.hotspot.style.top = (hs.y / 100) * h + "px";
+    els.hotspot.style.width = (hs.w / 100) * w + "px";
+    els.hotspot.style.height = (hs.h / 100) * h + "px";
+  }
+
+  function waitLayout() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+  }
+
+  function clickTarget(step) {
+    const cp = ensureClickPoint(step);
+    const w = els.image.clientWidth;
+    const h = els.image.clientHeight;
+    return {
+      x: (cp.x / 100) * w,
+      y: (cp.y / 100) * h,
+    };
+  }
+
+  async function animateClick(step) {
+    if (step.type === "slide" || step.simulateClick === false) return;
+    await clickFx.animateTo(clickTarget(step), { pressHotspot: true });
+  }
+
+  async function buildAndDrive(startIndex = 0, opts = {}) {
+    stop({ silent: true });
+    if (typeof opts.autoplay === "boolean") {
+      autoplayEnabled = opts.autoplay;
+    }
+    const demo = getDemo();
+    ensurePlayback(demo);
+    ensureNarration(demo);
+    const steps = demo.steps;
+    if (!steps.length) {
+      toast(t("player.noSteps"));
+      onRequestExit?.();
+      return;
+    }
+
+    const factory = driverFactory();
+    if (!factory) {
+      toast(t("player.driverMissing"));
+      onRequestExit?.();
+      return;
+    }
+
+    running = true;
+    exitOnOutsideClick = false;
+    setPresentHint(presentStopHintKey());
+    activeIndex = Math.max(0, Math.min(startIndex, steps.length - 1));
+    if (typeof setSelectedIndex === "function") setSelectedIndex(activeIndex);
+    els.hotspot?.classList.add("is-previewing");
+    await narration.startTour(demo);
+    await showStepVisual(steps[activeIndex], { speak: true });
+    // why: is-presenting muda o grid; o driver precisa do hotspot já no layout final (ainda em 1×)
+    await prepareStepCamera(steps[activeIndex]);
+
+    if (demo?.theme) applyTheme(demo.theme);
+
+    const veil = themeOverlayPaint(0.55);
+    driverObj = factory({
+      popoverClass: "demo-popover",
+      showProgress: true,
+      animate: true,
+      allowClose: true,
+      // why: setas tratadas em keydown abaixo — o keyup nativo do driver falhava no próximo com onNextClick async.
+      allowKeyboardControl: false,
+      overlayColor: veil.color,
+      overlayOpacity: veil.opacity,
+      stagePadding: 6,
+      disableActiveInteraction: false,
+      nextBtnText: t("player.next"),
+      prevBtnText: "",
+      doneBtnText: t("player.done"),
+      progressText: t("player.progress"),
+      onPopoverRender: (popover) => {
+        renderDemoPopoverFooter(popover);
+        setPopoverHiddenForSlide(steps[activeIndex]?.type === "slide");
+        armAutoplay();
+      },
+      steps: steps.map((step) => ({
+        element: step.type === "slide" ? "#canvas-slide" : "#hotspot",
+        popover: {
+          title: step.popover?.title || step.label || "",
+          description: (step.popover?.description || "").replace(/\n/g, "<br/>"),
+          side: step.popover?.side || "bottom",
+          align: step.popover?.align || "center",
+          onNextClick: async (_el, _step, opts) => {
+            if (animating) return;
+            animating = true;
+            clearAutoplay();
+            const current = steps[activeIndex];
+            const drv = opts.driver;
+            try {
+              await animateClick(current);
+              const nextIndex = activeIndex + 1;
+              if (nextIndex >= steps.length) {
+                drv.destroy();
+                driverObj = null;
+                narration.stop();
+                setProgress(t("player.doneStatus"));
+                return;
+              }
+              activeIndex = nextIndex;
+              if (typeof setSelectedIndex === "function") setSelectedIndex(activeIndex);
+              setProgress(t("player.stepOf", { current: activeIndex + 1, total: steps.length }));
+              await showStepVisual(steps[activeIndex], { speak: true });
+              await prepareStepCamera(steps[activeIndex]);
+              drv.moveNext();
+              await zoomAfterHighlightVisible(steps[activeIndex]);
+            } finally {
+              animating = false;
+            }
+          },
+          onPrevClick: async (_el, _step, opts) => {
+            if (animating || activeIndex <= 0) return;
+            animating = true;
+            clearAutoplay();
+            const drv = opts.driver;
+            try {
+              activeIndex -= 1;
+              if (typeof setSelectedIndex === "function") setSelectedIndex(activeIndex);
+              setProgress(t("player.stepOf", { current: activeIndex + 1, total: steps.length }));
+              await showStepVisual(steps[activeIndex], { speak: true });
+              await prepareStepCamera(steps[activeIndex]);
+              drv.movePrevious();
+              await zoomAfterHighlightVisible(steps[activeIndex]);
+            } finally {
+              animating = false;
+            }
+          },
+        },
+      })),
+      onDestroyed: () => {
+        clearAutoplay();
+        narration.stop();
+        setProgress(t("player.stopped"));
+        clickFx.reset();
+        clearZoom({ animate: false });
+        driverObj = null;
+        animating = false;
+        running = false;
+        if (suppressExitArm) return;
+        // why: o mesmo clique no overlay não deve sair; só o próximo clique fora.
+        queueMicrotask(() => {
+          if (!isPresenting()) return;
+          exitOnOutsideClick = true;
+          setPresentHint(presentAgainHintKey());
+        });
+      },
+    });
+
+    setProgress(t("player.stepOf", { current: activeIndex + 1, total: steps.length }));
+    driverObj.drive(activeIndex);
+    await zoomAfterHighlightVisible(steps[activeIndex]);
+  }
+
+  function stop({ silent = false } = {}) {
+    clearAutoplay();
+    narration.stop();
+    if (driverObj) {
+      suppressExitArm = true;
+      try {
+        driverObj.destroy();
+      } catch {
+        /* ignore */
+      } finally {
+        suppressExitArm = false;
+      }
+      driverObj = null;
+    }
+    clickFx.reset();
+    clearZoom({ animate: false });
+    animating = false;
+    running = false;
+    exitOnOutsideClick = false;
+    if (!silent) setProgress(t("player.stopped"));
+  }
+
+  function startIndex() {
+    if (typeof getSelectedIndex === "function") return getSelectedIndex();
+    return 0;
+  }
+
+  function bind() {
+    function onHighlightClick(e) {
+      if (!driverObj || !isPresenting()) return;
+      if (e.target.closest(".slide-card-play, .slide-card-close")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      clickDriverNext();
+    }
+
+    // why: o editor já avança o hotspot em is-previewing; o slide só o previewDriver cobre
+    els.slide?.addEventListener("click", onHighlightClick);
+
+    document.getElementById("canvas-slide-play")?.addEventListener(
+      "click",
+      (e) => {
+        if (!isPresenting() || !driverObj) return;
+        e.preventDefault();
+        e.stopPropagation();
+        clickDriverNext();
+      },
+      true
+    );
+
+    document.getElementById("canvas-slide-close")?.addEventListener(
+      "click",
+      (e) => {
+        if (!isPresenting()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        exitOnOutsideClick = false;
+        onRequestExit?.();
+      },
+      true
+    );
+
+    // why: 1º clique fora para o tour; 2º clique fora volta ao editor (sem depender só do Esc).
+    els.stage?.addEventListener("click", (e) => {
+      if (!isPresenting() || driverObj || !exitOnOutsideClick) return;
+      if (e.target.closest(".canvas-frame, .driver-popover, #present-chrome")) return;
+      exitOnOutsideClick = false;
+      onRequestExit?.();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (!isPresenting()) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        exitOnOutsideClick = false;
+        onRequestExit?.();
+        return;
+      }
+      if (!driverObj || animating) return;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        clickDriverNext();
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        clickDriverPrev();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (!isPresenting() || !running) return;
+      const demo = getDemo();
+      const step = demo.steps[activeIndex];
+      if (!step) return;
+      if (step.type === "slide") {
+        sizeSlideLikeImage(els.slide, els.stage, demo, step, resolveImageSrc);
+        return;
+      }
+      if (!els.image.hidden) {
+        placeHotspot(step.hotspot);
+        applyStepZoom(step).then(() => {
+          try {
+            driverObj?.refresh?.();
+          } catch {
+            /* ignore */
+          }
+        });
+      }
+    });
+  }
+
+  bind();
+
+  return {
+    play: (opts = {}) => buildAndDrive(opts.from ?? startIndex(), opts),
+    stop,
+    isRunning: () => running,
+  };
+}

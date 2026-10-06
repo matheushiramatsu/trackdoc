@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="doc.title.help">Como usar — TrackDoc</title>
+  <meta name="theme-color" content="#1732FF" />
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("ns-locale");
+        var langs = navigator.languages || (navigator.language ? [navigator.language] : []);
+        var pick = stored;
+        if (!pick) {
+          for (var i = 0; i < langs.length; i++) {
+            var p = String(langs[i] || "").toLowerCase().split("-")[0];
+            if (p === "pt" || p === "es" || p === "en") { pick = p; break; }
+          }
+        }
+        if (pick !== "pt" && pick !== "es" && pick !== "en") pick = "en";
+        document.documentElement.lang = pick === "pt" ? "pt-BR" : pick;
+      } catch (e) {}
+    })();
+  </script>
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem("ns-appearance") || "system";
+        var mode = pref;
+        if (pref !== "documento" && pref !== "social") {
+          mode = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "social"
+            : "documento";
+        }
+        if (window.parent !== window || new URLSearchParams(location.search).has("embed")) {
+          document.documentElement.classList.add("is-embedded");
+        }
+        document.documentElement.setAttribute("data-appearance", mode);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = "#0a0a0f";
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
+  <link rel="stylesheet" href="a/10/css/theme.css" />
+  <link rel="stylesheet" href="a/10/css/app.css" />
+  <link rel="stylesheet" href="a/10/css/ajuda.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand">
+      <a class="logo logo-link" href="index.html" aria-label="TrackDoc"><img src="trackdocs-logo-branco.svg" alt="TrackDoc" /></a>
+      <span class="topbar-title" data-i18n="help.manual">Manual</span>
+    </div>
+    <div class="topbar-appearance">
+      <label class="locale-select">
+        <select id="locale-select" data-i18n-aria="locale.label" aria-label="Idioma">
+          <option value="pt">PT</option>
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1 data-i18n="help.h1">Como gravar um demo</h1>
+    <p class="lead" data-i18n="help.lead">A extensão fotografa a tela do produto. O editor vira isso num tour com destaque, clique e narração.</p>
+
+    <section class="card" id="desktop">
+      <h2 data-i18n="help.desktopTitle">App desktop</h2>
+      <p data-i18n-html="help.desktopBody">No app Electron, use o botão <strong>Capturar</strong> no editor. Abre uma janela com a página do produto: fotografe, marque o clique e crie o projeto. Só captura o que estiver nessa janela. No navegador continue com a extensão abaixo.</p>
+    </section>
+
+    <section class="card" id="baixar">
+      <h2 data-i18n="help.installTitle">1. Instalar a extensão</h2>
+      <p data-i18n="help.installLead">A extensão TrackDoc — Captura está na Chrome Web Store. Um clique instala e o Chrome atualiza sozinho.</p>
+      <p>
+        <a class="store-link" href="https://chromewebstore.google.com/detail/bogjjfmcceccnepkpijiohglllbgbofd" target="_blank" rel="noopener noreferrer">
+          <span data-i18n="help.storeCta">Instalar na Chrome Web Store</span>
+        </a>
+      </p>
+      <ol>
+        <li data-i18n-html="help.installStore1">Abra a página da extensão e clique em <strong>Usar no Chrome</strong>.</li>
+        <li data-i18n-html="help.installStore2">Confirme em <strong>Adicionar extensão</strong>.</li>
+        <li data-i18n-html="help.installStore3">Fixe o ícone do TrackDoc na barra do Chrome para achar a captura rápido.</li>
+      </ol>
+      <details class="manual-install">
+        <summary data-i18n="help.zipTitle">Instalação manual (zip)</summary>
+        <p><a href="downloads/trackdoc-captura.zip"><span data-i18n="help.downloadZip">Baixar a extensão (zip)</span></a></p>
+        <ol>
+          <li data-i18n-html="help.install1">Descompacte o zip. A pasta precisa conter o arquivo <code>manifest.json</code>.</li>
+          <li data-i18n-html="help.install2">Abra <code>chrome://extensions</code>.</li>
+          <li data-i18n-html="help.install3">Ligue o <strong>Modo do desenvolvedor</strong>.</li>
+          <li data-i18n-html="help.install4">Clique em <strong>Carregar sem compactação</strong> e escolha essa pasta.</li>
+          <li data-i18n-html="help.install5">Quando sair uma versão nova, baixe de novo e clique em <strong>Recarregar</strong> no card da extensão.</li>
+        </ol>
+      </details>
+    </section>
+
+    <section class="card" id="gravar">
+      <h2 data-i18n="help.recordTitle">2. Gravar as telas</h2>
+      <p data-i18n-html="help.recordIntro">Deixe o editor aberto neste endereço. Na extensão da loja, o campo <strong>Editor</strong> já aponta para o TrackDoc publicado. Se o endereço abaixo for outro, cole-o nesse campo:</p>
+      <p class="origin" id="editor-origin"></p>
+      <ol>
+        <li data-i18n="help.record1">Abra a página do produto que você quer mostrar.</li>
+        <li data-i18n-html="help.record2">Clique no ícone da extensão e em <strong>Iniciar nesta aba</strong>.</li>
+        <li data-i18n-html="help.record3">Na barra de captura, <strong>Capturar</strong> congela a tela atual.</li>
+        <li data-i18n="help.record4">Clique no elemento que deve ser o destaque. Esse clique não tira outra foto.</li>
+        <li data-i18n="help.record5">Siga o fluxo do produto e repita capturar + clique.</li>
+        <li data-i18n-html="help.record6"><strong>Criar projeto</strong> abre o editor com um projeto novo, já com as imagens e os pontos de clique.</li>
+      </ol>
+      <p data-i18n-html="help.recordTips"><strong>Desfazer</strong> tira o último passo. <strong>Baixar JSON</strong> guarda um arquivo se o editor não estiver aberto. Atalhos: Option+Shift+C captura, Option+Shift+E cria o projeto.</p>
+      <p data-i18n-html="help.recordPrefer">Prefira <strong>Capturar</strong> e só então clicar. Um clique direto na página também gera um passo, mas a foto pode sair da tela já mudada.</p>
+    </section>
+
+    <section class="card" id="editor">
+      <h2 data-i18n="help.editorTitle">3. Montar o tour no editor</h2>
+      <p data-i18n-html="help.editorIntro">Na primeira visita, o TrackDoc abre o projeto de exemplo em <strong>Preview automático</strong>. <strong>Esc</strong> sai para o editor.</p>
+      <ol>
+        <li data-i18n="help.editor1">Ajuste o texto de cada passo no painel da direita.</li>
+        <li data-i18n="help.editor2">Arraste o retângulo para mudar o destaque e o ponto para mudar o clique simulado.</li>
+        <li data-i18n-html="help.editor3">Use <strong>Preview</strong> ou <strong>Preview automático</strong> para ver como o público vai ver; <strong>Esc</strong> volta à edição.</li>
+        <li data-i18n-html="help.editor4">Em <strong>Exportar</strong>, escolha HTML navegável ou vídeo.</li>
+      </ol>
+      <p data-i18n-html="help.editorTip">Sem a extensão, dá para criar um projeto vazio e enviar prints com <strong>+ Imagens</strong>.</p>
+    </section>
+
+    <section class="card" id="privacidade">
+      <h2 data-i18n="help.privacyTitle">Privacidade</h2>
+      <ul>
+        <li data-i18n="help.privacy1">A foto só é tirada quando você captura ou clica durante uma gravação.</li>
+        <li data-i18n="help.privacy2">As imagens ficam no Chrome até você criar o projeto, baixar o JSON ou cancelar.</li>
+        <li data-i18n="help.privacy3">Criar projeto envia as imagens apenas para o endereço do editor que está no popup, neste navegador.</li>
+        <li data-i18n="help.privacy4">A extensão não envia capturas para outro servidor e não vende esses dados.</li>
+      </ul>
+    </section>
+
+  </main>
+  <script src="a/10/vendor/motion/motion.js"></script>
+  <script type="module" src="a/10/js/motionFx.js"></script>
+  <script type="module">
+    import { initLocale, applyI18n, bindLocaleSelect } from "./a/10/js/i18n.js";
+    initLocale();
+    applyI18n(document);
+    bindLocaleSelect(document.getElementById("locale-select"));
+    document.getElementById("editor-origin").textContent = location.origin;
+  </script>
+</body>
+</html>

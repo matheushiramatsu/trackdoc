@@ -1,0 +1,56 @@
+import { t } from "./i18n.js";
+/** SVG da seta "anterior" — stroke via currentColor (= --ns-ink) */
+export const PREV_ARROW_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13.5 8L2.5 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 3.5L2.5 8L7 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/** Seta "próximo" — mesmo traço, sentido oposto. */
+export const NEXT_ARROW_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2.5 8H13.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3.5L13.5 8L9 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/**
+ * Layout do footer: ← | N de X | Próximo
+ * @param {import('driver.js').PopoverDOM} popover
+ */
+export function renderDemoPopoverFooter(popover) {
+  const { footer, progress, previousButton, nextButton, footerButtons } = popover;
+
+  if (previousButton) {
+    previousButton.innerHTML = PREV_ARROW_SVG;
+    previousButton.setAttribute("aria-label", t("player.prev"));
+    previousButton.title = t("player.prev");
+  }
+
+  if (nextButton) {
+    const label = (nextButton.textContent || "").trim() || t("player.next");
+    const isDone = label === t("player.done");
+    nextButton.classList.toggle("is-icon", !isDone);
+    if (!isDone) nextButton.innerHTML = NEXT_ARROW_SVG;
+    nextButton.setAttribute("aria-label", isDone ? label : t("player.next"));
+    nextButton.title = isDone ? label : t("player.next");
+  }
+
+  if (footer && previousButton && progress && nextButton) {
+    footer.appendChild(previousButton);
+    footer.appendChild(progress);
+    footer.appendChild(nextButton);
+    if (footerButtons && footerButtons !== footer && !footerButtons.children.length) {
+      footerButtons.remove();
+    }
+  }
+}
+
+export function setPopoverHiddenForSlide(hidden) {
+  document.querySelectorAll(".driver-popover").forEach((el) => {
+    el.classList.toggle("is-slide-hidden", !!hidden);
+  });
+}
+
+/** Clique no destaque = mesmo efeito do botão Próximo. */
+export function clickDriverNext() {
+  const btn = document.querySelector(".driver-popover-next-btn");
+  if (btn && !btn.disabled) btn.click();
+}
+
+/** Seta ← / Anterior — respeita o disabled do primeiro passo. */
+export function clickDriverPrev() {
+  const btn = document.querySelector(".driver-popover-prev-btn");
+  if (btn && !btn.disabled) btn.click();
+}
