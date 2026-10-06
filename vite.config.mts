@@ -13,7 +13,7 @@ export default defineConfig({
     alias: { '@': resolve(rootDir) },
   },
   build: {
-    outDir: 'dist/dock',
+    outDir: 'js/dock-runtime',
     emptyOutDir: true,
     lib: {
       entry: resolve(rootDir, 'components/dock-entry.tsx'),

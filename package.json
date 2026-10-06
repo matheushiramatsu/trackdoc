@@ -50,7 +50,7 @@
       "trackdocs-*.svg",
       "apple-touch-icon.png",
       "og-share.svg",
-      "dist/dock/**/*",
+      "js/dock-runtime/**/*",
       "css/**/*",
       "js/**/*",
       "data/**/*",
