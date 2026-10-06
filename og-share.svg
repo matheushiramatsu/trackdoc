@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1732FF"/>
+      <stop offset="1" stop-color="#24262D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <rect x="72" y="72" width="1056" height="486" rx="36" fill="#F5FAFF"/>
+  <rect x="142" y="166" width="480" height="298" rx="22" fill="#FFFFFF" stroke="#D2E7FC" stroke-width="8"/>
+  <rect x="278" y="256" width="212" height="120" rx="12" fill="none" stroke="#35A999" stroke-width="12"/>
+  <path d="M425 380 462 484l22-42 48 22-107-84Z" fill="#24262D"/>
+  <text x="700" y="306" fill="#1732FF" font-family="Arial, sans-serif" font-size="88" font-weight="700">TrackDoc</text>
+  <text x="704" y="382" fill="#46657A" font-family="Arial, sans-serif" font-size="38">Tours interativos</text>
+</svg>
