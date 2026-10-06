@@ -1459,21 +1459,19 @@ async function boot() {
 
   const index = readIndex();
   try {
+    if (seeded) {
+      await setActiveProjectId(null);
+      showLibrary();
+      return;
+    }
+
     if (index.activeProjectId) {
       const loaded = await getProject(index.activeProjectId);
       if (loaded) {
-        await openProject(loaded.id, { loadedProject: loaded, autoPreview: seeded && (loaded.steps || []).length > 0 });
+        await openProject(loaded.id, { loadedProject: loaded });
         return;
       }
       await setActiveProjectId(null);
-    }
-
-    if (seeded) {
-      const first = (readIndex().projects || [])[0];
-      if (first?.id) {
-        await openProject(first.id, { autoPreview: true });
-        return;
-      }
     }
 
     showLibrary();

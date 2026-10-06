@@ -22,7 +22,7 @@ O áudio da narração é gerado no dispositivo pelo Kokoro, sem chave de API. N
 
 ### Extensão de captura
 
-Instale pela [Chrome Web Store](https://chromewebstore.google.com/detail/bogjjfmcceccnepkpijiohglllbgbofd). O manual está em [`ajuda.html`](ajuda.html).
+Instale pela [Chrome Web Store](https://chromewebstore.google.com/detail/bogjjfmcceccnepkpijiohglllbgbofd) ou baixe o [`ZIP da extensão TrackDoc`](downloads/trackdoc-captura.zip). O manual está em [`ajuda.html`](ajuda.html).
 
 Para desenvolver a extensão localmente:
 
