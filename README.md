@@ -47,6 +47,12 @@ npm run dist:desktop
 
 No desktop, use **Capturar** no editor: abre uma janela com a página do produto, fotografa e monta o projeto. No navegador continue com a extensão.
 
+## Componentes React
+
+O Dock do editor usa React, TypeScript, Tailwind CSS v4 e a estrutura shadcn. Componentes reutilizáveis ficam em `components/ui/`, os estilos globais do Dock em `components/dock.css` e o alias `@/` está configurado em `tsconfig.json` e `components.json`.
+
+`npm start` compila o Dock antes de abrir o servidor. Para verificar os tipos, execute `npm run typecheck`; para recompilar o Dock continuamente enquanto desenvolve, use `npm run dev:dock` em outro terminal.
+
 ## Exportar
 
 - **HTML navegável** — um arquivo único com o tour

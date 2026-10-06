@@ -6,24 +6,35 @@
   "license": "MIT",
   "main": "electron/main.js",
   "scripts": {
-    "prestart": "node scripts/copy-tts-runtime.mjs",
+    "prestart": "npm run build:dock && node scripts/copy-tts-runtime.mjs",
     "start": "node scripts/dev-server.mjs",
     "pretest": "node scripts/copy-tts-runtime.mjs",
-    "vercel-build": "node scripts/copy-tts-runtime.mjs",
+    "vercel-build": "npm run build:dock && node scripts/copy-tts-runtime.mjs",
+    "build:dock": "vite build",
+    "typecheck": "tsc --noEmit",
+    "dev:dock": "vite build --watch",
     "pack:extension": "node scripts/pack-extension.mjs",
     "test": "node --test extension/lib/*.test.js scripts/*.test.js js/*.test.js electron/secret-store.test.js",
     "desktop": "electron .",
-    "predesktop": "node scripts/copy-tts-runtime.mjs",
-    "pre-dist:desktop": "node scripts/copy-tts-runtime.mjs",
+    "predesktop": "npm run build:dock && node scripts/copy-tts-runtime.mjs",
+    "pre-dist:desktop": "npm run build:dock && node scripts/copy-tts-runtime.mjs",
     "dist:desktop": "electron-builder --dir"
   },
   "devDependencies": {
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "electron": "^36.4.0",
     "electron-builder": "^26.0.12",
     "espeak-ng": "^1.0.2",
-    "kokoro-js": "^1.2.1"
+    "kokoro-js": "^1.2.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3"
   },
   "build": {
     "appId": "app.trackdoc",
@@ -39,6 +50,7 @@
       "trackdocs-*.svg",
       "apple-touch-icon.png",
       "og-share.svg",
+      "dist/dock/**/*",
       "css/**/*",
       "js/**/*",
       "data/**/*",
@@ -68,6 +80,12 @@
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
-    "motion": "^14.0.0"
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.0.0",
+    "lucide-react": "^1.52.0",
+    "motion": "^14.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwind-merge": "^3.7.0"
   }
 }

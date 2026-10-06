@@ -1,0 +1,54 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+.canvas-toolbar {
+  display: flex;
+  min-height: 58px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  padding: 4px 8px;
+  border-top: 1px solid var(--ns-border);
+  background: var(--ns-panel);
+}
+
+.trackdoc-action-dock {
+  border: 1px solid var(--ns-border);
+  border-radius: 9999px;
+  background: var(--ns-panel);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.trackdoc-action-dock-item {
+  border: 1px solid var(--ns-border);
+  border-radius: 9999px;
+  background: var(--ns-input-bg);
+  color: var(--ns-ink);
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.trackdoc-action-dock-item:hover,
+.trackdoc-action-dock-item:focus-visible {
+  border-color: var(--ns-accent);
+  background: var(--ns-hover);
+  outline: none;
+}
+
+.trackdoc-action-dock-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.trackdoc-action-dock-label {
+  border-color: var(--ns-border);
+  background: var(--ns-panel);
+  color: var(--ns-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trackdoc-action-dock-item {
+    transition: none;
+  }
+}

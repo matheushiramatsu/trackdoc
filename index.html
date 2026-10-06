@@ -57,6 +57,7 @@
   <link rel="stylesheet" href="a/10/vendor/driver/driver.css" />
   <link rel="stylesheet" href="a/10/css/theme.css" />
   <link rel="stylesheet" href="a/10/css/app.css" />
+  <link rel="stylesheet" href="a/10/dist/dock/dock.css" />
 </head>
 <body class="is-booting">
   <header class="topbar">
@@ -367,48 +368,10 @@
 
   <main id="view-editor" class="view view-editor" hidden>
     <aside class="filmstrip-panel" id="filmstrip-panel">
-      <div class="filmstrip-header">
-        <span class="filmstrip-multi-hint" data-i18n="filmstrip.multiHint">⌘/Ctrl+clique ou Shift para selecionar vários</span>
-      </div>
       <div class="filmstrip" id="filmstrip" aria-label="Passos do demo" data-i18n-aria="filmstrip.aria"></div>
     </aside>
 
     <section class="canvas-wrap">
-      <div class="canvas-toolbar" role="toolbar" aria-label="Edição" data-i18n-aria="toolbar.aria">
-        <div class="toolbar-group" role="group" aria-label="Adicionar" data-i18n-aria="toolbar.groupAdd">
-          <button type="button" class="btn btn-sm" id="btn-add-scene">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-layers"></use></svg>
-            <span data-i18n="toolbar.scene">Cena</span>
-          </button>
-          <button type="button" class="btn btn-sm" id="btn-add-step">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-plus"></use></svg>
-            <span data-i18n="toolbar.step">Passo</span>
-          </button>
-          <button type="button" class="btn btn-sm" id="btn-add-slide">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-slide"></use></svg>
-            <span data-i18n="toolbar.slide">Slide</span>
-          </button>
-          <button type="button" class="btn btn-sm" id="btn-add-images">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-image"></use></svg>
-            <span data-i18n="toolbar.images">Imagens</span>
-          </button>
-        </div>
-        <span class="toolbar-divider" aria-hidden="true"></span>
-        <div class="toolbar-group" role="group" aria-label="Editar" data-i18n-aria="toolbar.groupEdit">
-          <button type="button" class="btn btn-sm" id="btn-dup-step" title="Duplicar (⌘D)" data-i18n-title="toolbar.duplicateTitle">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-duplicate"></use></svg>
-            <span data-i18n="toolbar.duplicate">Duplicar</span>
-          </button>
-          <button type="button" class="btn btn-sm" id="btn-copy-step" title="Copiar (⌘C)" data-i18n-title="toolbar.copyTitle">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-copy"></use></svg>
-            <span data-i18n="toolbar.copy">Copiar</span>
-          </button>
-          <button type="button" class="btn btn-sm" id="btn-paste-step" title="Colar (⌘V)" data-i18n-title="toolbar.pasteTitle">
-            <svg class="btn-ico" aria-hidden="true"><use href="#i-paste"></use></svg>
-            <span data-i18n="toolbar.paste">Colar</span>
-          </button>
-        </div>
-      </div>
       <p class="present-hint" id="present-chrome" hidden data-i18n="present.escHint">Clique fora para parar · Esc sai</p>
       <button type="button" class="present-close" id="present-close" hidden aria-label="Fechar" data-i18n-aria="present.close">
         <svg class="btn-ico" aria-hidden="true"><use href="#i-close"></use></svg>
@@ -468,6 +431,16 @@
           <div class="sim-cursor" id="editor-sim-cursor" hidden></div>
           <div class="caption-bar" id="canvas-caption" hidden></div>
         </div>
+      </div>
+      <div class="canvas-toolbar" id="canvas-toolbar-root" aria-label="Ações do editor"></div>
+      <div hidden id="canvas-toolbar-legacy" aria-hidden="true">
+        <button type="button" id="btn-add-scene" title="Adicionar cena" data-i18n-title="toolbar.addSceneTitle"></button>
+        <button type="button" id="btn-add-step" title="Adicionar passo" data-i18n-title="toolbar.addStepTitle"></button>
+        <button type="button" id="btn-add-slide" title="Adicionar slide" data-i18n-title="toolbar.addSlideTitle"></button>
+        <button type="button" id="btn-add-images" title="Adicionar imagens" data-i18n-title="toolbar.addImagesTitle"></button>
+        <button type="button" id="btn-dup-step" title="Duplicar (⌘D)" data-i18n-title="toolbar.duplicateTitle"></button>
+        <button type="button" id="btn-copy-step" title="Copiar (⌘C)" data-i18n-title="toolbar.copyTitle"></button>
+        <button type="button" id="btn-paste-step" title="Colar (⌘V)" data-i18n-title="toolbar.pasteTitle"></button>
       </div>
     </section>
 
@@ -890,6 +863,7 @@
 
   <script src="a/10/vendor/driver/driver.js.iife.js"></script>
   <script src="a/10/vendor/motion/motion.js"></script>
+  <script type="module" src="a/10/dist/dock/dock.js"></script>
   <script type="module" src="a/10/js/app.js"></script>
   <script type="module" src="a/10/js/motionFx.js"></script>
 </body>

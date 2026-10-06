@@ -287,9 +287,11 @@ export function createEditor(ctx) {
         const label = sceneLabel(demo, step.scene);
         html += `<div class="film-scene" data-scene="${Number(step.scene) || 1}" draggable="true">
           <span class="film-grip" aria-hidden="true">⋮⋮</span>
+          <svg class="film-scene-icon" aria-hidden="true"><use href="#i-layers"></use></svg>
           <span class="film-scene-label" data-action="rename-scene-inline" data-scene="${Number(step.scene) || 1}" title="${escapeAttr(t("filmstrip.sceneRename"))}">${escapeHtml(t("filmstrip.scene", { n: step.scene }))}${label ? ` · ${escapeHtml(label)}` : ""}</span>
         </div>`;
       }
+      const typeIcon = step.type === "slide" ? "i-slide" : "i-image";
       const src = resolveImageSrc(demo, step.image);
       const thumb =
         step.type === "slide"
@@ -312,7 +314,7 @@ export function createEditor(ctx) {
              tabindex="0"
              aria-selected="${selectedSet.has(index) ? "true" : "false"}">
           <span class="film-grip" aria-hidden="true">⋮⋮</span>
-          ${thumb}
+          <span class="film-thumb-wrap">${thumb}<svg class="film-type-icon" aria-hidden="true"><use href="#${typeIcon}"></use></svg></span>
           <div class="film-meta">
             <strong>${escapeHtml(stepListName(step))}</strong>
             <span>#${index + 1}</span>

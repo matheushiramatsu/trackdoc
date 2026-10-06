@@ -10,5 +10,4 @@ node_modules
 .git
 electron
 release
-dist
 package-lock.json
