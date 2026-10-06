@@ -20,9 +20,6 @@ const CLIPBOARD_STORE = "clipboard";
 const CLIPBOARD_KEY = "steps";
 const INDEX_KEY = "demo-studio-index-v2";
 const LEGACY_KEYS = ["interactive-demo-v1"];
-const DEFAULT_JSON_URL = "data/demo.json";
-/** Bump when data/demo.json muda — reinstala o tour de exemplo sem apagar outros projetos. */
-const SEED_REVISION = 3;
 const STOCK_DEMO_NAME = "Como usar o Guia";
 
 const DEFAULT_SCENE_LABELS = {
@@ -309,12 +306,6 @@ function loadLegacyLocalStorage() {
   return null;
 }
 
-async function fetchDefaultDemo() {
-  const res = await fetch(DEFAULT_JSON_URL, { cache: "no-cache" });
-  if (!res.ok) throw new Error("Não foi possível carregar data/demo.json");
-  return res.json();
-}
-
 /** Reconstrói o índice a partir do que ainda existe no IndexedDB. */
 async function reconcileIndexFromIdb() {
   const stored = await listAllProjects();
@@ -329,60 +320,49 @@ async function reconcileIndexFromIdb() {
   return { index, stored };
 }
 
-async function seedDefaultDemoProject({ replaceExisting = false } = {}) {
-  let legacy = loadLegacyLocalStorage();
-  let data = legacy?.data || null;
-  let fromLegacy = Boolean(data?.steps?.length);
-
-  if (!fromLegacy) {
-    data = await fetchDefaultDemo();
-  }
-
-  if (!data?.steps?.length) {
-    throw new Error("Demo padrão sem passos");
-  }
-
-  const stockName = data.name || STOCK_DEMO_NAME;
-  const index = readIndex();
-  const existingSummary = (index.projects || []).find((p) => p.name === stockName || p.name === STOCK_DEMO_NAME);
-  const prev = existingSummary && replaceExisting ? await getProject(existingSummary.id) : null;
+async function migrateLegacyProject() {
+  const legacy = loadLegacyLocalStorage();
+  const data = legacy?.data;
+  if (!data?.steps?.length) return null;
 
   const project = demoPayloadToProject(data, {
-    name: stockName,
-    id: prev?.id,
+    name: data.name || t("default.importedProject"),
   });
-  if (prev?.createdAt) project.createdAt = prev.createdAt;
   project.sceneLabels = {
     ...(data.sceneLabels && Object.keys(data.sceneLabels).length
       ? data.sceneLabels
       : DEFAULT_SCENE_LABELS),
   };
-  if (!project.theme.presetId) {
-    project.theme.presetId = THEME_PRESETS[0].id;
-  }
+  if (!project.theme.presetId) project.theme.presetId = THEME_PRESETS[0].id;
   await putProject(project);
 
-  if (fromLegacy && legacy?.key) {
+  if (legacy.key) {
     try {
       localStorage.removeItem(legacy.key);
     } catch {
       /* ignore */
     }
   }
-
-  const nextIndex = readIndex();
-  nextIndex.activeProjectId = nextIndex.activeProjectId || project.id;
-  nextIndex.migrated = true;
-  nextIndex.seedRevision = SEED_REVISION;
-  writeIndex(nextIndex);
+  const index = readIndex();
+  index.activeProjectId = index.activeProjectId || project.id;
+  index.migrated = true;
+  writeIndex(index);
   return project;
 }
 
+async function removeStockDemoProjects() {
+  const stockIds = readIndex().projects
+    .filter((project) => project.name === STOCK_DEMO_NAME)
+    .map((project) => project.id);
+  for (const id of stockIds) await deleteProject(id);
+  return stockIds.length;
+}
+
 /**
- * Garante biblioteca utilizável:
+ * Prepara a biblioteca sem inserir projetos de exemplo:
  * - reconcilia IndexedDB ↔ índice
- * - se não houver nenhum projeto, reinstala a demo padrão
- * - se o seed mudou, atualiza o tour de exemplo (mesmo nome)
+ * - remove o projeto de exemplo que versões antigas semeavam
+ * - migra projetos legados do localStorage
  * @returns {{ index: object, seeded: boolean }}
  */
 export async function ensureMigrated() {
@@ -391,36 +371,24 @@ export async function ensureMigrated() {
   let index = readIndex();
   let seeded = false;
 
-  // Biblioteca vazia → sempre reinstala a demo (mesmo se migrated=true)
+  await removeStockDemoProjects();
+  index = readIndex();
+
   if (!(index.projects || []).length) {
-    try {
-      await seedDefaultDemoProject();
+    const migratedProject = await migrateLegacyProject();
+    if (migratedProject) {
       index = readIndex();
       seeded = true;
-    } catch (err) {
-      console.warn("Falha ao restaurar demo padrão", err);
-      index.migrated = false;
-      writeIndex(index);
-      throw err;
     }
-  } else if ((index.seedRevision || 0) < SEED_REVISION) {
-    try {
-      await seedDefaultDemoProject({ replaceExisting: true });
-      index = readIndex();
-    } catch (err) {
-      console.warn("Falha ao atualizar demo padrão", err);
-    }
-  } else if (!index.migrated) {
+  }
+
+  await removeStockDemoProjects();
+  index = readIndex();
+  if (!index.migrated) {
     index.migrated = true;
     writeIndex(index);
   }
 
   return { index, seeded };
 }
-
-/** Força reinstalação da demo embutida a partir de data/demo.json. */
-export async function restoreDefaultDemo() {
-  return seedDefaultDemoProject({ replaceExisting: true });
-}
-
 export { DEFAULT_SCENE_LABELS };
