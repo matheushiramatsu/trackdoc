@@ -8,7 +8,7 @@ import {
 } from "./editor-origin.js";
 
 test("origem padrão do editor está configurada", () => {
-  assert.equal(DEFAULT_EDITOR_ORIGIN, "https://guiaflow-seven.vercel.app");
+  assert.equal(DEFAULT_EDITOR_ORIGIN, "https://trackdocumentations.vercel.app");
 });
 
 test("normaliza URL com caminho e barra final", () => {

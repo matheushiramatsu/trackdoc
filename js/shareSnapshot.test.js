@@ -61,8 +61,8 @@ test("embedImagesInDemo embute custom: sem rede", async () => {
 
 test("shareViewUrl monta /v/:id", () => {
   assert.equal(
-    shareViewUrl("Ab3xY9kLm2Q", "https://guiaflow-seven.vercel.app"),
-    "https://guiaflow-seven.vercel.app/v/Ab3xY9kLm2Q"
+    shareViewUrl("Ab3xY9kLm2Q", "https://trackdocumentations.vercel.app"),
+    "https://trackdocumentations.vercel.app/v/Ab3xY9kLm2Q"
   );
 });
 
