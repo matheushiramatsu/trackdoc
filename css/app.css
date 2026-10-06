@@ -2787,6 +2787,10 @@ body.view-share .caption-bar {
   backdrop-filter: blur(4px);
 }
 
+.project-card-close.has-origin-motion {
+  position: absolute;
+}
+
 .project-card-close:hover {
   color: var(--ns-danger);
   border-color: color-mix(in srgb, var(--ns-danger) 35%, var(--ns-border));

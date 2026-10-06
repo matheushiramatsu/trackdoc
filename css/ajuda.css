@@ -3,6 +3,13 @@
   text-decoration: none;
 }
 
+body.help-page {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 html.is-embedded .topbar {
   display: none;
 }
