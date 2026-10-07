@@ -280,6 +280,9 @@ export function createEditor(ctx) {
     }
     let html = "";
     let lastScene = null;
+    // why: data URLs têm vários MB; escapar e reinterpretar como HTML a cada render custa caro.
+    // O src entra por propriedade depois do innerHTML, na mesma ordem das <img>.
+    const thumbSrcs = [];
 
     demo.steps.forEach((step, index) => {
       if (step.scene !== lastScene) {
@@ -297,7 +300,7 @@ export function createEditor(ctx) {
         step.type === "slide"
           ? `<div class="film-thumb-slide">SLIDE</div>`
           : src
-            ? `<img src="${escapeAttr(src)}" alt="" loading="lazy" draggable="false" />`
+            ? (thumbSrcs.push(src), `<img alt="" loading="lazy" draggable="false" />`)
             : `<div class="film-thumb-slide">—</div>`;
       const classes = [
         "film-item",
@@ -326,6 +329,11 @@ export function createEditor(ctx) {
     });
 
     els.filmstrip.innerHTML = html;
+    if (thumbSrcs.length) {
+      els.filmstrip.querySelectorAll(".film-thumb-wrap > img").forEach((img, i) => {
+        img.src = thumbSrcs[i];
+      });
+    }
   }
 
   function syncSideAlignControls(step) {
