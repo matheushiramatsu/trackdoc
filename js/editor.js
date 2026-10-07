@@ -1576,6 +1576,8 @@ export function createEditor(ctx) {
 
     let html = "";
     let lastGroup = null;
+    // why: mesmo caso da filmstrip; o src (data URL de vários MB) entra por propriedade.
+    const tileSrcs = [];
     filtered.forEach((it) => {
       if (it.group !== lastGroup) {
         lastGroup = it.group;
@@ -1589,7 +1591,7 @@ export function createEditor(ctx) {
       html += `
         <div class="image-tile-wrap">
           <button type="button" class="image-tile ${active}" data-ref="${escapeAttr(it.ref)}" title="${escapeAttr(it.label)}">
-            <img src="${escapeAttr(it.src)}" alt="" loading="lazy" />
+            ${(tileSrcs.push(it.src), `<img alt="" loading="lazy" />`)}
             <span>${escapeHtml(shortImageLabel(it.ref, demo))}</span>
           </button>
           ${remove}
@@ -1598,6 +1600,11 @@ export function createEditor(ctx) {
 
     els.imageGrid.innerHTML =
       html || `<p class="image-grid-empty">Nenhuma imagem ainda. Arraste, cole ou envie do computador.</p>`;
+    if (tileSrcs.length) {
+      els.imageGrid.querySelectorAll(".image-tile > img").forEach((img, i) => {
+        img.src = tileSrcs[i];
+      });
+    }
   }
 
   function removeCustomImage(ref) {
