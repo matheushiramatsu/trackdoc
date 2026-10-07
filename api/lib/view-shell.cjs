@@ -84,9 +84,9 @@ function renderViewPage({ id, name, origin, missing }) {
   </script>
   <link rel="icon" href="/trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="stylesheet" href="/a/11/vendor/driver/driver.css" />
-  <link rel="stylesheet" href="/a/11/css/theme.css" />
-  <link rel="stylesheet" href="/a/11/css/app.css" />
+  <link rel="stylesheet" href="/a/12/vendor/driver/driver.css" />
+  <link rel="stylesheet" href="/a/12/css/theme.css" />
+  <link rel="stylesheet" href="/a/12/css/app.css" />
   <script>window.__GF_SHARE = ${JSON.stringify({ id: id || null, name: name || null, missing: Boolean(missing) })};</script>
 </head>
 <body class="view-share">
@@ -140,8 +140,8 @@ function renderViewPage({ id, name, origin, missing }) {
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="/a/11/vendor/driver/driver.js.iife.js"></script>
-  <script type="module" src="/a/11/js/viewApp.js"></script>
+  <script src="/a/12/vendor/driver/driver.js.iife.js"></script>
+  <script type="module" src="/a/12/js/viewApp.js"></script>
 </body>
 </html>
 `;
