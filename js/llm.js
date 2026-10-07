@@ -210,10 +210,10 @@ export function buildUserPrompt({ context, draft, locale, focus, stepType, hasIm
     "Do NOT describe the screenshot as an image or inventory the UI (bad: \"The panel is open with 0 steps\", \"It shows buttons X and Y\", \"The image displays…\").",
     "Do NOT narrate tour-editor chrome or meta tooling unless that UI is the product being taught.",
     `Respond in locale "${lang}".`,
-    'Return ONLY compact JSON: {"title":"...","description":"...","narration":"..."}',
+    'Return ONLY compact JSON: {"title":"...","description":"..."}',
     "title: short label for this teaching moment (a few words).",
     "description: one glanceable sentence (about 80–140 characters) — purpose of this screen + next action when there is one.",
-    "narration: 2–4 spoken sentences for voiceover; guide the learner, name the control to use when marked, continue the story from prior steps.",
+    "Do not write narration, subtitles, or captions; voiceover text is entered separately by the author.",
   ];
   if (type === "slide") {
     lines.push(
@@ -313,9 +313,8 @@ export function parseCopyJson(raw) {
   }
   const title = String(data?.title || "").trim();
   const description = String(data?.description || "").trim();
-  const narration = String(data?.narration || data?.caption || "").trim();
-  if (!title || !description || !narration) return null;
-  return { title, description, narration };
+  if (!title || !description) return null;
+  return { title, description };
 }
 
 function clipError(text) {

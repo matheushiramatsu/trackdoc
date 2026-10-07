@@ -77,8 +77,3 @@ export function zoomCameraStyle(camera) {
     transformOrigin: "center center",
   };
 }
-
-/** @deprecated use zoomCameraStyle — mantido para callers que só precisam do transform */
-export function zoomCameraCss(camera) {
-  return zoomCameraStyle(camera).transform;
-}

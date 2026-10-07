@@ -177,7 +177,7 @@ export function createPlayer(ctx) {
   }
 
   function zoomEnabled(step) {
-    return step?.type !== "slide" && step?.zoomHighlight === true && els.image && !els.image.hidden;
+    return step?.type !== "slide" && step?.showHighlight === true && step?.zoomHighlight === true && els.image && !els.image.hidden;
   }
 
   async function applyStepZoom(step) {
@@ -261,7 +261,7 @@ export function createPlayer(ctx) {
       }
 
       els.slide.hidden = true;
-      els.hotspot.hidden = false;
+      els.hotspot.hidden = step.showHighlight !== true;
       els.hotspot.style.display = "";
       els.hotspot.classList.add("is-previewing");
 
@@ -270,6 +270,7 @@ export function createPlayer(ctx) {
         if (els.missing) els.missing.hidden = ok;
         if (ok) {
           placeHotspot(step.hotspot);
+          els.hotspot.hidden = step.showHighlight !== true;
         } else {
           els.hotspot.hidden = true;
         }
@@ -368,7 +369,7 @@ export function createPlayer(ctx) {
         armAutoplay();
       },
       steps: steps.map((step) => ({
-        element: step.type === "slide" ? "#canvas-slide" : "#hotspot",
+        element: step.type === "slide" ? "#canvas-slide" : step.showHighlight !== true ? "#canvas-image" : "#hotspot",
         popover: {
           title: step.popover?.title || step.label || "",
           description: (step.popover?.description || "").replace(/\n/g, "<br/>"),
@@ -534,7 +535,14 @@ export function createPlayer(ctx) {
       }
     });
 
+    let resizeFrame = 0;
     window.addEventListener("resize", () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(relayoutStage);
+    });
+
+    function relayoutStage() {
+      resizeFrame = 0;
       if (!isPresenting() || !running) return;
       const demo = getDemo();
       const step = demo.steps[activeIndex];
@@ -553,7 +561,7 @@ export function createPlayer(ctx) {
           }
         });
       }
-    });
+    }
   }
 
   bind();

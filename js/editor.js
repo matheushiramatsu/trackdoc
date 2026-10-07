@@ -8,8 +8,6 @@ import {
   fileToDataUrl,
   ensureClickPoint,
   clickPointFromHotspot,
-  applyTheme,
-  formToTheme,
   bindImage,
 } from "./store.js";
 import { createClickFxController } from "./clickFx.js";
@@ -44,7 +42,6 @@ import {
   generateNarrationClips,
   minHoldSecondsForStep,
   normalizeCaptionPlaybackRate,
-  playableNarrationClips,
   savedNarrationClips,
   stopSpeech,
 } from "./playback.js";
@@ -145,6 +142,9 @@ export function createEditor(ctx) {
     labelAlign: document.getElementById("label-align"),
     propSimulate: document.getElementById("prop-simulate-click"),
     wrapSimulate: document.getElementById("wrap-simulate"),
+    stepToggleActions: document.getElementById("step-toggle-actions"),
+    propHighlight: document.getElementById("prop-highlight-enabled"),
+    wrapHighlight: document.getElementById("wrap-highlight"),
     propZoom: document.getElementById("prop-zoom-highlight"),
     wrapZoom: document.getElementById("wrap-zoom"),
     wrapImage: document.getElementById("wrap-image"),
@@ -291,8 +291,8 @@ export function createEditor(ctx) {
           <span class="film-scene-label" data-action="rename-scene-inline" data-scene="${Number(step.scene) || 1}" title="${escapeAttr(t("filmstrip.sceneRename"))}">${escapeHtml(t("filmstrip.scene", { n: step.scene }))}${label ? ` · ${escapeHtml(label)}` : ""}</span>
         </div>`;
       }
-      const typeIcon = step.type === "slide" ? "i-slide" : "i-image";
       const src = resolveImageSrc(demo, step.image);
+      const typeIcon = step.type === "slide" ? "i-slide" : "i-image";
       const thumb =
         step.type === "slide"
           ? `<div class="film-thumb-slide">SLIDE</div>`
@@ -326,14 +326,6 @@ export function createEditor(ctx) {
     });
 
     els.filmstrip.innerHTML = html;
-    els.filmstrip.querySelectorAll("img").forEach((img) => {
-      img.addEventListener("error", () => {
-        img.replaceWith(Object.assign(document.createElement("div"), {
-          className: "film-thumb-slide",
-          textContent: "—",
-        }));
-      });
-    });
   }
 
   function syncSideAlignControls(step) {
@@ -365,7 +357,9 @@ export function createEditor(ctx) {
       setChoice(els.propAlign, step.popover?.align || "center");
     }
     if (els.wrapSimulate) els.wrapSimulate.hidden = !!isSlide;
+    if (els.wrapHighlight) els.wrapHighlight.hidden = !!isSlide;
     if (els.wrapZoom) els.wrapZoom.hidden = !!isSlide;
+    if (els.stepToggleActions) els.stepToggleActions.hidden = !!isSlide;
   }
 
   function syncForm() {
@@ -387,7 +381,11 @@ export function createEditor(ctx) {
     els.propTitle.value = step.popover?.title || step.label || "";
     els.propDescription.value = step.popover?.description || "";
     if (els.propCaption) els.propCaption.value = step.caption || "";
-    if (els.propShowCaption) els.propShowCaption.checked = step.showCaption !== false;
+    if (els.propShowCaption) {
+      const hasNarration = Boolean(String(step.caption || "").trim());
+      els.propShowCaption.checked = !hasNarration && step.showCaption !== false;
+      els.propShowCaption.disabled = hasNarration;
+    }
     if (els.propHold) {
       const custom = Number(step.holdSeconds);
       els.propHold.value =
@@ -395,6 +393,7 @@ export function createEditor(ctx) {
       els.propHold.placeholder = String(demo.playback.defaultHoldSeconds);
     }
     els.propSimulate.checked = step.simulateClick !== false;
+    if (els.propHighlight) els.propHighlight.checked = step.showHighlight === true;
     if (els.propZoom) els.propZoom.checked = step.zoomHighlight === true;
     syncSideAlignControls(step);
     els.wrapImage.hidden = step.type === "slide";
@@ -946,7 +945,7 @@ export function createEditor(ctx) {
     }
 
     els.canvasSlide.hidden = true;
-    els.hotspot.hidden = false;
+    els.hotspot.hidden = step.showHighlight !== true;
     const showClick = step.simulateClick !== false;
     els.clickPoint.hidden = !showClick;
 
@@ -1049,7 +1048,15 @@ export function createEditor(ctx) {
     step.simulateClick = els.propSimulate.checked;
     if (els.propZoom) step.zoomHighlight = els.propZoom.checked;
     step.caption = els.propCaption?.value || "";
-    step.showCaption = els.propShowCaption ? els.propShowCaption.checked : true;
+    const hasNarration = Boolean(step.caption.trim());
+    if (els.propShowCaption) {
+      if (hasNarration) els.propShowCaption.checked = false;
+      els.propShowCaption.disabled = hasNarration;
+      step.showCaption = hasNarration ? false : els.propShowCaption.checked;
+    } else {
+      step.showCaption = true;
+    }
+    if (els.propHighlight) step.showHighlight = els.propHighlight.checked;
     writeHoldFromInput(step, options?.clampHold !== false);
     const isSlide = step.type === "slide";
     const typeChanged = wasSlide !== isSlide;
@@ -1076,6 +1083,23 @@ export function createEditor(ctx) {
     }
     renderCanvas();
     syncCaptionAudio();
+    onChange();
+  }
+
+  function applyToggleToStep(toggle) {
+    if (suppressForm) return;
+    const step = currentStep();
+    if (!step) return;
+
+    if (toggle === "simulate") {
+      step.simulateClick = els.propSimulate.checked;
+      els.clickPoint.hidden = step.type === "slide" || !step.simulateClick;
+    } else if (toggle === "highlight") {
+      step.showHighlight = els.propHighlight.checked;
+      els.hotspot.hidden = step.type === "slide" || !step.showHighlight;
+    } else if (toggle === "zoom") {
+      step.zoomHighlight = els.propZoom.checked;
+    }
     onChange();
   }
 
@@ -1183,14 +1207,14 @@ export function createEditor(ctx) {
       const step = {
         id: createStepId(),
         scene: 1,
-        label: t("editor.newStep"),
+        label: "",
         type: "screen",
         image: "",
         hotspot: { x: 40, y: 40, w: 14, h: 8 },
         clickPoint: { x: 47, y: 44 },
         popover: {
-          title: t("editor.newStep"),
-          description: t("editor.editHint"),
+          title: "",
+          description: "",
           side: "bottom",
           align: "center",
         },
@@ -1237,10 +1261,6 @@ export function createEditor(ctx) {
     renderCanvas();
   }
 
-  function reorderSteps(fromIndex, toIndex, scene) {
-    reorderStepGroup([fromIndex], toIndex, scene);
-  }
-
   function reorderStepGroup(indices, insertBefore, scene) {
     const demo = getDemo();
     const sorted = normalizeIndices(indices, demo.steps.length);
@@ -1270,14 +1290,14 @@ export function createEditor(ctx) {
     const step = {
       id: createStepId(),
       scene: prev?.scene || 1,
-      label: asSlide ? t("editor.newSlide") : t("editor.newStep"),
+      label: "",
       type: asSlide ? "slide" : "screen",
       image: asSlide ? "" : prev?.image || "",
       hotspot: { x: 40, y: 40, w: 14, h: 8 },
       clickPoint: { x: 47, y: 44 },
       popover: {
-        title: asSlide ? t("editor.newSlide") : t("editor.newStep"),
-        description: t("editor.editHint"),
+        title: "",
+        description: "",
         side: "bottom",
         align: "center",
       },
@@ -1435,19 +1455,18 @@ export function createEditor(ctx) {
     if (createSteps) {
       let idx = demo.steps.length ? getSelectedIndex() + 1 : 0;
       const firstIdx = idx;
-      refs.forEach((ref, i) => {
-        const name = demo.customImages[ref.slice(7)].name.replace(/\.[^.]+$/, "");
+      refs.forEach((ref) => {
         const step = {
           id: createStepId(),
           scene: prev?.scene || 1,
-          label: name || `Imagem ${i + 1}`,
+          label: "",
           type: "screen",
           image: ref,
           hotspot: { x: 40, y: 40, w: 14, h: 8 },
           clickPoint: { x: 47, y: 44 },
           popover: {
-            title: name || t("editor.newHighlight"),
-            description: t("editor.editExplain"),
+            title: "",
+            description: "",
             side: "bottom",
             align: "center",
           },
@@ -1465,7 +1484,6 @@ export function createEditor(ctx) {
       const step = currentStep();
       if (step && step.type !== "slide") {
         step.image = refs[0];
-        step.label = step.label || demo.customImages[refs[0].slice(7)].name;
       }
       setDemo(demo);
       fillImageSelect();
@@ -1491,19 +1509,18 @@ export function createEditor(ctx) {
 
   function insertScreenStep(ref) {
     const demo = getDemo();
-    const rawLabel = shortImageLabel(ref, demo).replace(/\.[^.]+$/, "");
     const prev = demo.steps[getSelectedIndex()];
     const step = {
       id: createStepId(),
       scene: prev?.scene || 1,
-      label: rawLabel || t("editor.defaultImage"),
+      label: "",
       type: "screen",
       image: ref,
       hotspot: { x: 40, y: 40, w: 14, h: 8 },
       clickPoint: { x: 47, y: 44 },
       popover: {
-        title: rawLabel || t("editor.newHighlight"),
-        description: t("editor.editExplain"),
+        title: "",
+        description: "",
         side: "bottom",
         align: "center",
       },
@@ -1625,6 +1642,31 @@ export function createEditor(ctx) {
     return true;
   }
 
+  async function pasteImageFromClipboard({ quiet = false } = {}) {
+    if (!navigator.clipboard?.read) {
+      if (!quiet) toast(t("toast.imageClipboardUnavailable"));
+      return false;
+    }
+    try {
+      const files = [];
+      for (const item of await navigator.clipboard.read()) {
+        const type = item.types.find((value) => value.startsWith("image/"));
+        if (!type) continue;
+        const blob = await item.getType(type);
+        files.push(withImageName(new File([blob], `colada-${Date.now()}.${type.split("/")[1] || "png"}`, { type })));
+      }
+      if (!files.length) {
+        if (!quiet) toast(t("toast.clipboardNoImage"));
+        return false;
+      }
+      await ingestImageFiles(files, { createSteps: true });
+      return true;
+    } catch (err) {
+      if (!quiet) toast(err?.message || t("toast.imageClipboardUnavailable"));
+      return false;
+    }
+  }
+
   function applyImageRef(ref) {
     if (pickMode === "add") {
       insertScreenStep(ref);
@@ -1634,14 +1676,6 @@ export function createEditor(ctx) {
     if (!step || step.type === "slide") return;
     step.image = ref;
     const demo = getDemo();
-    const label = shortImageLabel(ref, demo);
-    const name = label.replace(/\.[^.]+$/, "");
-    const defaults = new Set(["", t("editor.newStep"), t("editor.newHighlight"), t("editor.newSlide")]);
-    if (!step.popover) step.popover = {};
-    if (defaults.has(step.label || "") || defaults.has(step.popover.title || "")) {
-      step.label = name;
-      if (defaults.has(step.popover.title || "")) step.popover.title = name;
-    }
     if (els.propTitle) els.propTitle.value = step.popover.title || step.label || "";
     fillImageSelect();
     els.propImage.value = ref;
@@ -1660,6 +1694,20 @@ export function createEditor(ctx) {
   }
 
   function bindFilmstripDnD() {
+    // "error" não borbulha: um listener em captura cobre todas as miniaturas.
+    els.filmstrip.addEventListener(
+      "error",
+      (e) => {
+        const img = e.target;
+        if (!(img instanceof HTMLImageElement)) return;
+        img.replaceWith(Object.assign(document.createElement("div"), {
+          className: "film-thumb-slide",
+          textContent: "—",
+        }));
+      },
+      true
+    );
+
     els.filmstrip.addEventListener("dragstart", (e) => {
       if (e.target.closest("button, .inline-edit")) {
         e.preventDefault();
@@ -2216,7 +2264,6 @@ export function createEditor(ctx) {
         draft: {
           title: els.propTitle?.value || step.popover?.title || step.label || "",
           description: els.propDescription?.value || step.popover?.description || "",
-          caption: els.propCaption?.value || step.caption || "",
         },
         locale: getLocale(),
         focus,
@@ -2246,7 +2293,6 @@ export function createEditor(ctx) {
       }
       if (els.propTitle) els.propTitle.value = parsed.title;
       if (els.propDescription) els.propDescription.value = parsed.description;
-      if (els.propCaption) els.propCaption.value = parsed.narration;
       applyFormToStep();
       toast(t("toast.llmCopied"));
     } catch (err) {
@@ -2498,10 +2544,13 @@ export function createEditor(ctx) {
   }
 
   function bindForm() {
-    [els.propTitle, els.propDescription, els.propCaption, els.propShowCaption, els.propSimulate, els.propZoom].forEach((el) => {
+    [els.propTitle, els.propDescription, els.propCaption, els.propShowCaption].forEach((el) => {
       if (!el) return;
       el.addEventListener("input", applyFormToStep);
     });
+    els.propSimulate?.addEventListener("change", () => applyToggleToStep("simulate"));
+    els.propHighlight?.addEventListener("change", () => applyToggleToStep("highlight"));
+    els.propZoom?.addEventListener("change", () => applyToggleToStep("zoom"));
     if (els.propHold) {
       els.propHold.addEventListener("input", () => applyFormToStep({ clampHold: false }));
       els.propHold.addEventListener("change", () => applyFormToStep({ clampHold: true }));
@@ -2609,10 +2658,12 @@ export function createEditor(ctx) {
       });
     });
     document.getElementById("btn-paste-step")?.addEventListener("click", () => {
-      pasteStepFromClipboard().catch((err) => {
-        console.error(err);
-        toast(err?.message || t("toast.clipboardEmpty"));
-      });
+      pasteImageFromClipboard({ quiet: true })
+        .then((pastedImage) => pastedImage || pasteStepFromClipboard())
+        .catch((err) => {
+          console.error(err);
+          toast(err?.message || t("toast.clipboardEmpty"));
+        });
     });
 
     window.addEventListener("keydown", (e) => {
@@ -2636,7 +2687,9 @@ export function createEditor(ctx) {
       }
       if (mod && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "v") {
         e.preventDefault();
-        pasteStepFromClipboard().catch(() => {});
+        pasteImageFromClipboard({ quiet: true }).then((pastedImage) => {
+          if (!pastedImage) return pasteStepFromClipboard();
+        }).catch(() => {});
         return;
       }
 
@@ -2699,7 +2752,6 @@ export function createEditor(ctx) {
     document.getElementById("btn-pick-image")?.addEventListener("click", () => {
       openImageModal("replace");
     });
-
     document.getElementById("btn-close-image-modal")?.addEventListener("click", () => {
       els.imageModal.close();
     });
@@ -2749,17 +2801,28 @@ export function createEditor(ctx) {
         createSteps: pickMode === "add" || pickMode === "createSteps",
       });
     });
-
-    document.querySelectorAll("[data-theme-key]").forEach((input) => {
-      input.addEventListener("input", () => {
-        const demo = getDemo();
-        demo.theme = formToTheme(demo.theme);
-        applyTheme(demo.theme);
-        onChange();
+    document.addEventListener("paste", (e) => {
+      if (e.defaultPrevented || els.imageModal?.open) return;
+      const target = e.target;
+      if (target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName)) return;
+      const files = imageFilesFromTransfer(e.clipboardData);
+      if (!files.length || !currentStep() || currentStep().type === "slide") return;
+      e.preventDefault();
+      ingestImageFiles(files, { createSteps: true }).catch((err) => {
+        toast(err?.message || t("toast.noValidImage"));
       });
     });
 
+    // Inputs de tema: tratados em app.js (bindChrome), que também atualiza o painel.
+
+    let resizeFrame = 0;
     window.addEventListener("resize", () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(relayoutCanvas);
+    });
+
+    function relayoutCanvas() {
+      resizeFrame = 0;
       const step = currentStep();
       if (!step) return;
       if (step.type === "slide") {
@@ -2769,7 +2832,7 @@ export function createEditor(ctx) {
       placeHotspot(step.hotspot);
       if (step.simulateClick !== false) placeClickPoint(ensureClickPoint(step));
       else els.clickPoint.hidden = true;
-    });
+    }
   }
 
   function stopPreview() {

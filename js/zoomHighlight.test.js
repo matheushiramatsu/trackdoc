@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { computeZoomCamera, zoomCameraCss, zoomCameraStyle } from "./zoomHighlight.js";
+import { computeZoomCamera, zoomCameraStyle } from "./zoomHighlight.js";
 
 test("sem zoom devolve identidade", () => {
   const cam = computeZoomCamera({ x: 10, y: 10, w: 5, h: 5 }, { w: 800, h: 600 }, { w: 1000, h: 700 }, false);
   assert.equal(cam.scale, 1);
   assert.equal(cam.translateX, 0);
   assert.equal(cam.translateY, 0);
-  assert.equal(zoomCameraCss(cam), "none");
+  assert.equal(zoomCameraStyle(cam).transform, "none");
 });
 
 test("destaque pequeno amplia até o teto anti-pixelação", () => {

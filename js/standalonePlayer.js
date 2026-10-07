@@ -119,15 +119,6 @@ function gfT(key, vars) {
     return imageRef;
   }
 
-  function hexToRgba(hex, alpha) {
-    const h = String(hex || "").replace("#", "");
-    if (h.length !== 6) return `rgba(0,0,0,${alpha})`;
-    const r = parseInt(h.slice(0, 2), 16);
-    const g = parseInt(h.slice(2, 4), 16);
-    const b = parseInt(h.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
   const DEFAULT_HOLD_SECONDS = 6;
   const BG_VOLUME = 0.22;
   const BG_DUCK_VOLUME = 0.06;
@@ -220,30 +211,6 @@ function gfT(key, vars) {
       audio.src = url;
       applyRate();
       audio.play().catch(reject);
-    });
-  }
-
-  function speakText(text, voiceURI, rate) {
-    stopSpeech();
-    const token = speakToken;
-    const trimmed = String(text || "").trim();
-    if (!trimmed) return Promise.resolve();
-    const langMap = {
-      pf_dora: "pt-BR", pm_alex: "pt-BR", pm_santa: "pt-BR",
-      ef_dora: "es-ES", em_alex: "es-ES", em_santa: "es-ES",
-      af_heart: "en-US", af_bella: "en-US", am_michael: "en-US",
-      bf_emma: "en-GB", bm_george: "en-GB",
-    };
-    const lang = langMap[voiceURI] || "pt-BR";
-    if (!window.speechSynthesis) return Promise.resolve();
-    return new Promise((resolve) => {
-      const utterance = new SpeechSynthesisUtterance(trimmed);
-      utterance.lang = lang;
-      utterance.rate = Math.min(1.4, Math.max(0.7, Number(rate) || 1));
-      utterance.onend = () => resolve();
-      utterance.onerror = () => resolve();
-      if (token === speakToken) window.speechSynthesis.speak(utterance);
-      else resolve();
     });
   }
 
@@ -417,6 +384,9 @@ function gfT(key, vars) {
 
   function renderDemoPopoverFooter(popover) {
     const { footer, progress, previousButton, nextButton, footerButtons } = popover;
+    const popoverElement = footer?.closest(".driver-popover");
+    const hasDescription = Boolean(popover.description?.textContent?.trim());
+    popoverElement?.classList.toggle("is-no-description", !hasDescription);
     if (previousButton) {
       previousButton.innerHTML = PREV_ARROW_SVG;
       previousButton.setAttribute("aria-label", gfT("player.prev"));
@@ -585,7 +555,7 @@ function gfT(key, vars) {
   }
 
   function zoomEnabled(step) {
-    return step?.type !== "slide" && step?.zoomHighlight === true && els.image && !els.image.hidden;
+    return step?.type !== "slide" && step?.showHighlight === true && step?.zoomHighlight === true && els.image && !els.image.hidden;
   }
 
   async function applyStepZoom(step) {
@@ -674,7 +644,7 @@ function gfT(key, vars) {
       }
 
       els.slide.hidden = true;
-      els.hotspot.style.display = "block";
+      els.hotspot.style.display = step.showHighlight === true ? "block" : "none";
       els.clickPoint.hidden = false;
 
       const src = resolveImageSrc(step.image);
@@ -688,6 +658,7 @@ function gfT(key, vars) {
         requestAnimationFrame(() => {
           if (ok) {
             placeHotspot(step.hotspot);
+            if (step.showHighlight !== true) els.hotspot.style.display = "none";
             placeClickPoint(ensureClickPoint(step));
           }
           resolve();
@@ -784,7 +755,7 @@ function gfT(key, vars) {
         armAutoplay();
       },
       steps: steps.map((step) => ({
-        element: step.type === "slide" ? "#player-slide" : "#player-hotspot",
+        element: step.type === "slide" ? "#player-slide" : step.showHighlight !== true ? "#player-image" : "#player-hotspot",
         popover: {
           title: step.popover?.title || step.label || "",
           description: (step.popover?.description || "").replace(/\n/g, "<br/>"),
@@ -935,7 +906,16 @@ function gfT(key, vars) {
     }
   });
 
+  let resizeFrame = 0;
   window.addEventListener("resize", () => {
+    if (resizeFrame) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      relayoutStage();
+    });
+  });
+
+  function relayoutStage() {
     const step = demo.steps[activeIndex];
     if (step && step.type !== "slide" && !els.image.hidden) {
       placeHotspot(step.hotspot);
@@ -948,7 +928,7 @@ function gfT(key, vars) {
         }
       });
     }
-  });
+  }
 
   setProgress(gfT("player.readyHint"));
 })();

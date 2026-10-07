@@ -125,5 +125,3 @@ export async function synthesizeKokoro({ text, voiceURI, rate = 1, onProgress } 
   return clips;
 }
 
-export const KOKORO_MODEL_ID = MODEL_ID;
-export const KOKORO_MODEL_DOWNLOAD_MB = 95;

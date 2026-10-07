@@ -31,13 +31,6 @@ function emptySession() {
   return { active: false, shots: [], pendingDownloadId: null };
 }
 
-function defaultSettings() {
-  return {
-    editorOrigin: DEFAULT_EDITOR_ORIGIN,
-    projectName: "",
-  };
-}
-
 async function loadSession() {
   if (session) return session;
   const stored = await chrome.storage.local.get(STORAGE_KEY);

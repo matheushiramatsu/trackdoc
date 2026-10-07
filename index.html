@@ -475,6 +475,23 @@
         <svg class="btn-ico btn-ai-spark" aria-hidden="true"><use href="#i-sparkles"></use></svg>
         <span id="btn-generate-copy-label" data-i18n="props.generateCopyShort">Gerar textos</span>
       </button>
+      <div class="step-toggle-actions" id="step-toggle-actions">
+        <label class="checkbox icon-toggle" id="wrap-simulate" title="Simular clique ao avançar" data-i18n-title="props.simulateClick">
+          <input type="checkbox" id="prop-simulate-click" checked />
+          <span class="visually-hidden" data-i18n="props.simulateClick">Simular clique ao avançar</span>
+          <svg class="checkbox-icon" aria-hidden="true"><use href="#i-click"></use></svg>
+        </label>
+        <label class="checkbox icon-toggle" id="wrap-highlight" title="Destacar área neste passo" data-i18n-title="props.highlightEnabled">
+          <input type="checkbox" id="prop-highlight-enabled" />
+          <span class="visually-hidden" data-i18n="props.highlightEnabled">Destacar área neste passo</span>
+          <svg class="checkbox-icon" aria-hidden="true"><use href="#i-highlight"></use></svg>
+        </label>
+        <label class="checkbox icon-toggle" id="wrap-zoom" title="Ampliar destaque" data-i18n-title="props.zoomHighlight">
+          <input type="checkbox" id="prop-zoom-highlight" />
+          <span class="visually-hidden" data-i18n="props.zoomHighlight">Ampliar destaque</span>
+          <svg class="checkbox-icon" aria-hidden="true"><use href="#i-zoom"></use></svg>
+        </label>
+      </div>
       <label><span data-i18n="props.title">Título</span>
         <input type="text" id="prop-title" />
       </label>
@@ -512,14 +529,6 @@
         </div>
         <p class="props-meta" id="caption-audio-status" hidden data-i18n="props.noAudio">Sem áudio neste passo.</p>
       </div>
-      <label class="checkbox" id="wrap-simulate">
-        <input type="checkbox" id="prop-simulate-click" checked />
-        <span data-i18n="props.simulateClick">Simular clique ao avançar</span>
-      </label>
-      <label class="checkbox" id="wrap-zoom">
-        <input type="checkbox" id="prop-zoom-highlight" />
-        <span data-i18n="props.zoomHighlight">Ampliar destaque</span>
-      </label>
       <div class="hold-field">
         <label><span data-i18n="props.hold">Temporizador (s)</span>
           <input type="number" id="prop-hold" min="1" max="120" step="1" placeholder="padrão" data-i18n-placeholder="props.holdDefault" />
@@ -779,6 +788,17 @@
     </symbol>
     <symbol id="i-screen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/>
+    </symbol>
+    <symbol id="i-click" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 3 12 11-6 .7 3.2 5.2-2.6 1.5-3.1-5.4L6 21z"/>
+      <path d="M17 3v3M21 7h-3"/>
+    </symbol>
+    <symbol id="i-highlight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/>
+      <rect x="7" y="7" width="10" height="10" rx="1"/>
+    </symbol>
+    <symbol id="i-zoom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M10.5 7.5v6M7.5 10.5h6"/>
     </symbol>
     <symbol id="i-side-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 4h8"/><rect x="5" y="8" width="14" height="11" rx="1.5"/>

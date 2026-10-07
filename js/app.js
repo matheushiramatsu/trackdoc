@@ -59,11 +59,6 @@ import {
   canOfferChromeExtension,
   shouldShowExtensionBanner,
 } from "./extensionBanner.js";
-import {
-  RELEASE_NOTES_DISMISS_KEY,
-  RELEASE_NOTES_VERSION,
-  shouldShowReleaseNotes,
-} from "./releaseNotes.js";
 import { COMPACT_LANDSCAPE_MQ, COMPACT_TOUCH_MQ, isCompactLandscape, isCompactTouch } from "./compact.js";
 import { initButtonMotion } from "./buttonMotion.js";
 
@@ -630,16 +625,19 @@ function renderNewProjectThemes() {
   });
 }
 
+let dateFormatter = null;
+
 function formatDate(ts) {
   if (!ts) return "";
   try {
-    return new Date(ts).toLocaleString("pt-BR", {
+    dateFormatter ||= new Intl.DateTimeFormat("pt-BR", {
       day: "2-digit",
       month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
+    return dateFormatter.format(new Date(ts));
   } catch {
     return "";
   }
@@ -1026,17 +1024,23 @@ function bindChrome() {
   bindDeleteProjectModal();
 
   // Theme panel
+  // O seletor de cor dispara "input" continuamente ao arrastar: aplica no máximo uma vez por frame.
+  let themeInputFrame = 0;
+  const applyThemeInputs = () => {
+    themeInputFrame = 0;
+    if (!project) return;
+    project.theme = formToTheme(project.theme);
+    delete project.theme.presetId;
+    delete project.theme.customId;
+    themeSelection = { kind: "custom", id: null };
+    applyTheme(project.theme);
+    renderThemePanel();
+    document.getElementById("btn-del-theme").hidden = true;
+    onChange();
+  };
   document.querySelectorAll("[data-theme-key]").forEach((input) => {
     input.addEventListener("input", () => {
-      if (!project) return;
-      project.theme = formToTheme(project.theme);
-      delete project.theme.presetId;
-      delete project.theme.customId;
-      themeSelection = { kind: "custom", id: null };
-      applyTheme(project.theme);
-      renderThemePanel();
-      document.getElementById("btn-del-theme").hidden = true;
-      onChange();
+      if (!themeInputFrame) themeInputFrame = requestAnimationFrame(applyThemeInputs);
     });
   });
 
@@ -1401,40 +1405,11 @@ function bindExtensionBanner() {
   sync();
 }
 
-function bindReleaseNotes() {
-  const banner = document.getElementById("release-notes");
-  if (!banner) return;
-
-  const sync = () => {
-    let dismissedVersion = null;
-    try {
-      dismissedVersion = localStorage.getItem(RELEASE_NOTES_DISMISS_KEY);
-    } catch (err) {
-      dismissedVersion = null;
-    }
-    banner.hidden = !shouldShowReleaseNotes({
-      dismissedVersion,
-      currentVersion: RELEASE_NOTES_VERSION,
-    });
-  };
-
-  document.getElementById("release-notes-dismiss")?.addEventListener("click", () => {
-    try {
-      localStorage.setItem(RELEASE_NOTES_DISMISS_KEY, RELEASE_NOTES_VERSION);
-    } catch (err) {
-      /* o aviso some nesta visita mesmo se o storage falhar */
-    }
-    banner.hidden = true;
-  });
-  sync();
-}
-
 async function boot() {
   initButtonMotion();
   initLocale();
   applyI18n(document);
   bindExtensionBanner();
-  bindReleaseNotes();
   bindLocaleSelect(document.getElementById("locale-select"), () => {
     applyChromeAppearance();
     paintChrome();

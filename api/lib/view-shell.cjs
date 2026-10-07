@@ -26,7 +26,6 @@ function renderViewPage({ id, name, origin, missing }) {
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);
   const safeName = escapeHtml(name || "");
-  const safeId = escapeHtml(id || "");
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">

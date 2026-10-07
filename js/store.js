@@ -67,12 +67,6 @@ export function themeOverlayPaint(baseOpacity = 0.55) {
   return { color, opacity };
 }
 
-/** @deprecated prefer themeOverlayPaint — mantido para callers que só precisam de uma cor */
-export function themeOverlayColor(alpha = 0.55) {
-  const { color, opacity } = themeOverlayPaint(alpha);
-  return hexToRgba(color, opacity);
-}
-
 export function themeToForm(theme) {
   const map = {
     accent: "theme-accent",

@@ -87,9 +87,13 @@ function layoutCaptureView() {
   captureView.setBounds({ x: 0, y: bar, width, height: Math.max(100, height - bar) });
 }
 
+// Lido uma vez: a injeção roda a cada navegação e não deve bloquear o processo principal.
+let contentScriptSource = null;
+
 async function injectContentScript() {
   if (!captureView) return;
-  const source = fs.readFileSync(CONTENT_JS, "utf8");
+  contentScriptSource ??= await fs.promises.readFile(CONTENT_JS, "utf8");
+  const source = contentScriptSource;
   await captureView.webContents.executeJavaScript(source, true);
   await captureView.webContents.executeJavaScript(
     `window.guiaDesktop && window.guiaDesktop.send({ type: "STATUS" })`,

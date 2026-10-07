@@ -103,18 +103,55 @@ export function writeIndex(index) {
   );
 }
 
-function summarizeProject(project) {
+/** Data URLs maiores que isto viram miniatura reduzida no índice (localStorage tem ~5 MB). */
+const THUMB_INLINE_MAX = 32 * 1024;
+const THUMB_MAX_WIDTH = 640;
+
+function projectThumbSource(project) {
   const firstImage = (project.steps || []).find(
     (s) => s.type !== "slide" && s.image
   )?.image;
-  let thumb = null;
   if (firstImage?.startsWith("custom:")) {
-    const id = firstImage.slice(7);
-    thumb = project.customImages?.[id]?.dataUrl || null;
-  } else if (firstImage && !firstImage.startsWith("data:")) {
-    thumb = firstImage;
-  } else if (firstImage?.startsWith("data:")) {
-    thumb = firstImage;
+    return project.customImages?.[firstImage.slice(7)]?.dataUrl || null;
+  }
+  return firstImage || null;
+}
+
+/** Identifica a imagem sem guardar o conteúdo no índice. */
+function thumbKeyFor(src) {
+  if (!src) return "";
+  if (!src.startsWith("data:")) return src;
+  const mid = Math.floor(src.length / 2);
+  return `${src.length}:${src.slice(mid, mid + 32)}:${src.slice(-32)}`;
+}
+
+async function downscaleDataUrl(src) {
+  if (typeof createImageBitmap !== "function" || typeof document === "undefined") return src;
+  try {
+    const bitmap = await createImageBitmap(await (await fetch(src)).blob());
+    const scale = Math.min(1, THUMB_MAX_WIDTH / bitmap.width);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    const thumb = canvas.toDataURL("image/jpeg", 0.78);
+    return thumb.length < src.length ? thumb : src;
+  } catch {
+    return src;
+  }
+}
+
+async function summarizeProject(project, previous = null) {
+  const src = projectThumbSource(project);
+  const thumbKey = thumbKeyFor(src);
+  let thumb = null;
+  if (previous && previous.thumbKey === thumbKey && previous.thumb !== undefined) {
+    thumb = previous.thumb;
+  } else if (src?.startsWith("data:") && src.length > THUMB_INLINE_MAX) {
+    thumb = await downscaleDataUrl(src);
+  } else {
+    thumb = src;
   }
 
   return {
@@ -124,16 +161,21 @@ function summarizeProject(project) {
     updatedAt: project.updatedAt,
     stepCount: Array.isArray(project.steps) ? project.steps.length : 0,
     thumb,
+    thumbKey,
     themePreview: themePreviewDots(project.theme),
   };
 }
 
-function upsertSummary(index, project) {
-  const summary = summarizeProject(project);
+async function upsertSummary(project) {
+  const previous = readIndex().projects.find((p) => p.id === project.id) || null;
+  const summary = await summarizeProject(project, previous);
+  // Relê depois do await: outra gravação pode ter alterado o índice nesse intervalo.
+  const index = readIndex();
   const i = index.projects.findIndex((p) => p.id === project.id);
   if (i >= 0) index.projects[i] = summary;
   else index.projects.unshift(summary);
   index.projects.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  writeIndex(index);
   return index;
 }
 
@@ -153,9 +195,7 @@ export async function putProject(project) {
     updatedAt: Date.now(),
   };
   await withStore("readwrite", (store) => store.put(next));
-  const index = readIndex();
-  upsertSummary(index, next);
-  writeIndex(index);
+  await upsertSummary(next);
   return next;
 }
 
@@ -183,9 +223,7 @@ export async function putProjectAndHistory(project, stacks) {
     tx.objectStore(STORE).put(next);
     tx.objectStore(HISTORY_STORE).put(historyRow);
   });
-  const index = readIndex();
-  upsertSummary(index, next);
-  writeIndex(index);
+  await upsertSummary(next);
   return next;
 }
 
@@ -309,8 +347,12 @@ function loadLegacyLocalStorage() {
 /** Reconstrói o índice a partir do que ainda existe no IndexedDB. */
 async function reconcileIndexFromIdb() {
   const stored = await listAllProjects();
+  const previous = new Map(readIndex().projects.map((p) => [p.id, p]));
+  const summaries = await Promise.all(
+    stored.filter((p) => p?.id).map((p) => summarizeProject(p, previous.get(p.id)))
+  );
   const index = readIndex();
-  index.projects = stored.filter((p) => p?.id).map(summarizeProject);
+  index.projects = summaries;
   index.projects.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
   if (index.activeProjectId && !index.projects.some((p) => p.id === index.activeProjectId)) {
     index.activeProjectId = null;
@@ -391,4 +433,5 @@ export async function ensureMigrated() {
 
   return { index, seeded };
 }
+
 export { DEFAULT_SCENE_LABELS };

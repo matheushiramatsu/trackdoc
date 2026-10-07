@@ -128,16 +128,15 @@ test("prompt orienta o aprendiz e diferencia clique vs só destaque", () => {
   assert.match(messages[0].content[0].text, /Click target: x=10 y=9/);
 });
 
-test("parseCopyJson aceita cerca markdown e exige narração", () => {
+test("parseCopyJson aceita título e descrição sem gerar narração", () => {
   const parsed = parseCopyJson(
-    '```json\n{"title":"Oi","description":"Resumo","narration":"Detalhe falado"}\n```'
+    '```json\n{"title":"Oi","description":"Resumo"}\n```'
   );
   assert.deepEqual(parsed, {
     title: "Oi",
     description: "Resumo",
-    narration: "Detalhe falado",
   });
-  assert.equal(parseCopyJson('{"title":"x","description":"y"}'), null);
+  assert.equal(parseCopyJson('{"title":"x"}'), null);
 });
 
 test("chatCompletions envia Bearer e redige a chave no erro", async () => {

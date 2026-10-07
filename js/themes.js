@@ -165,21 +165,6 @@ export function cloneTheme(colors, meta = {}) {
   return next;
 }
 
-export function themeFromFormValues(values, current = {}) {
-  const accent = values.accent || current.accent || "#1732FF";
-  return {
-    ...current,
-    accent,
-    accentDark: darkenHex(accent),
-    overlay: values.overlay || current.overlay,
-    popoverBg: values.popoverBg || current.popoverBg,
-    title: values.title || current.title,
-    text: values.text || current.text,
-    button: values.button || current.button,
-    hotspot: values.hotspot || current.hotspot,
-  };
-}
-
 export function darkenHex(hex, amount = 0.15) {
   const h = String(hex || "#000000").replace("#", "");
   if (h.length !== 6) return hex;
@@ -261,27 +246,6 @@ export function cycleAppearancePreference(current = getAppearancePreference()) {
   const order = ["system", "documento", "social"];
   const idx = order.indexOf(current);
   return order[(idx + 1) % order.length];
-}
-
-export function isDesignSystemPreset(presetId) {
-  return DESIGN_SYSTEM_PRESET_IDS.includes(presetId);
-}
-
-/** Tema do projeto acompanha o modo se estiver num preset do design system */
-export function themeForAppearance(mode) {
-  const preset = getPreset(mode === "social" ? "social" : "documento");
-  return cloneTheme(preset.colors, { presetId: preset.id });
-}
-
-/** Inferência de aparência a partir do tema (export HTML) */
-export function appearanceFromTheme(theme) {
-  if (!theme) return "documento";
-  if (theme.appearance === "social" || theme.appearance === "documento") {
-    return theme.appearance;
-  }
-  if (theme.presetId === "social") return "social";
-  if (theme.presetId === "documento") return "documento";
-  return "documento";
 }
 
 function colorsEqual(a, b) {

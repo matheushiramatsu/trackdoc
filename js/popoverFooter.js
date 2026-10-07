@@ -11,6 +11,9 @@ export const NEXT_ARROW_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" f
  */
 export function renderDemoPopoverFooter(popover) {
   const { footer, progress, previousButton, nextButton, footerButtons } = popover;
+  const popoverElement = footer?.closest(".driver-popover");
+  const hasDescription = Boolean(popover.description?.textContent?.trim());
+  popoverElement?.classList.toggle("is-no-description", !hasDescription);
 
   if (previousButton) {
     previousButton.innerHTML = PREV_ARROW_SVG;
