@@ -2,7 +2,9 @@
 
 import {
   AnimatePresence,
-  motion,
+  LazyMotion,
+  domAnimation,
+  m,
   useMotionValue,
   useSpring,
   useTransform,
@@ -91,33 +93,36 @@ function Dock({
   const heightRow = useTransform(isHovered, [0, 1], [panelHeight, maxHeight]);
   const height = useSpring(heightRow, spring);
 
+  // why: `m` + domAnimation carrega só animações, exit e gestos; o `motion` completo inclui drag e layout sem uso aqui.
   return (
-    <motion.div
-      style={{ height, scrollbarWidth: 'none' }}
-      className="mx-2 flex max-w-full items-end overflow-x-auto"
-    >
-      <motion.div
-        onMouseMove={({ clientX }) => {
-          isHovered.set(1);
-          mouseX.set(clientX);
-        }}
-        onMouseLeave={() => {
-          isHovered.set(0);
-          mouseX.set(Number.POSITIVE_INFINITY);
-        }}
-        className={cn(
-          'mx-auto flex w-fit gap-3 rounded-2xl px-3',
-          className,
-        )}
-        style={{ height: panelHeight }}
-        role="toolbar"
-        aria-label="Ações do editor"
+    <LazyMotion features={domAnimation}>
+      <m.div
+        style={{ height, scrollbarWidth: 'none' }}
+        className="mx-2 flex max-w-full items-end overflow-x-auto"
       >
-        <DockContext.Provider value={{ mouseX, spring, distance, magnification }}>
-          {children}
-        </DockContext.Provider>
-      </motion.div>
-    </motion.div>
+        <m.div
+          onMouseMove={({ clientX }) => {
+            isHovered.set(1);
+            mouseX.set(clientX);
+          }}
+          onMouseLeave={() => {
+            isHovered.set(0);
+            mouseX.set(Number.POSITIVE_INFINITY);
+          }}
+          className={cn(
+            'mx-auto flex w-fit gap-3 rounded-2xl px-3',
+            className,
+          )}
+          style={{ height: panelHeight }}
+          role="toolbar"
+          aria-label="Ações do editor"
+        >
+          <DockContext.Provider value={{ mouseX, spring, distance, magnification }}>
+            {children}
+          </DockContext.Provider>
+        </m.div>
+      </m.div>
+    </LazyMotion>
   );
 }
 
@@ -137,7 +142,7 @@ function DockItem({ children, className, label, onClick, disabled }: DockItemPro
   const width = useSpring(widthTransform, spring);
 
   return (
-    <motion.button
+    <m.button
       ref={ref}
       type="button"
       disabled={disabled}
@@ -159,7 +164,7 @@ function DockItem({ children, className, label, onClick, disabled }: DockItemPro
           ? cloneElement(child, { width, isHovered })
           : child,
       )}
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -174,7 +179,7 @@ function DockLabel({ children, className, isHovered }: DockLabelProps) {
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.span
+        <m.span
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: -8 }}
           exit={{ opacity: 0, y: 0 }}
@@ -186,7 +191,7 @@ function DockLabel({ children, className, isHovered }: DockLabelProps) {
           role="tooltip"
         >
           {children}
-        </motion.span>
+        </m.span>
       )}
     </AnimatePresence>
   );
@@ -197,12 +202,12 @@ function DockIcon({ children, className, width }: DockIconProps) {
   const widthTransform = useTransform(width ?? fallbackWidth, (value) => value / 2);
 
   return (
-    <motion.span
+    <m.span
       style={{ width: widthTransform }}
       className={cn('flex h-full items-center justify-center', className)}
     >
       {children}
-    </motion.span>
+    </m.span>
   );
 }
 

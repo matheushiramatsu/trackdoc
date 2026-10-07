@@ -21,7 +21,8 @@ export default defineConfig({
       fileName: () => 'dock.js',
     },
     rollupOptions: {
-      output: { assetFileNames: 'dock.[ext]' },
+      // why: lib "es" mantém espaços por padrão; o Dock é runtime do app, não pacote publicado.
+      output: { assetFileNames: 'dock.[ext]', minify: true },
     },
   },
 });
