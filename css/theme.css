@@ -88,6 +88,21 @@
   isolation: isolate;
 }
 
+.driver-popover.presentation-popover {
+  position: fixed !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  width: min(360px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  transform: translateX(-50%) translateZ(0) !important;
+}
+
+.driver-popover.presentation-popover .driver-popover-arrow {
+  display: none !important;
+}
+
 /*
  * why: o SVG do Driver usa z-index inline 10000; no zoom a captura pode cobrir o recorte.
  * Mantém a overlay abaixo do popover (…020) e da legenda (…015).

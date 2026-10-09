@@ -10,10 +10,9 @@ import {
   ensurePlayback,
   holdMs,
 } from "./playback.js";
-import { isCompactTouch } from "./compact.js";
 
 export function createPlayer(ctx) {
-  const { getDemo, toast, getSelectedIndex, setSelectedIndex, onRequestExit, presentHintKey } = ctx;
+  const { getDemo, toast, getSelectedIndex, setSelectedIndex, onRequestExit } = ctx;
 
   const els = {
     stage: document.getElementById("canvas-stage"),
@@ -49,27 +48,6 @@ export function createPlayer(ctx) {
   let running = false;
   let exitOnOutsideClick = false;
   let suppressExitArm = false;
-
-  function presentHintEl() {
-    return document.getElementById("present-chrome");
-  }
-
-  function setPresentHint(key) {
-    const el = presentHintEl();
-    if (!el) return;
-    el.textContent = t(key);
-    el.dataset.i18n = key;
-  }
-
-  function presentStopHintKey() {
-    if (presentHintKey) return presentHintKey;
-    return isCompactTouch() ? "present.touchHint" : "present.escHint";
-  }
-
-  function presentAgainHintKey() {
-    if (presentHintKey) return presentHintKey;
-    return isCompactTouch() ? "present.touchAgainHint" : "present.clickAgainHint";
-  }
 
   function autoplayOn() {
     return autoplayEnabled;
@@ -336,7 +314,6 @@ export function createPlayer(ctx) {
 
     running = true;
     exitOnOutsideClick = false;
-    setPresentHint(presentStopHintKey());
     activeIndex = Math.max(0, Math.min(startIndex, steps.length - 1));
     if (typeof setSelectedIndex === "function") setSelectedIndex(activeIndex);
     els.hotspot?.classList.add("is-previewing");
@@ -349,7 +326,7 @@ export function createPlayer(ctx) {
 
     const veil = themeOverlayPaint(0.55);
     driverObj = factory({
-      popoverClass: "demo-popover",
+      popoverClass: "demo-popover presentation-popover",
       showProgress: true,
       animate: true,
       allowClose: true,
@@ -435,7 +412,6 @@ export function createPlayer(ctx) {
         queueMicrotask(() => {
           if (!isPresenting()) return;
           exitOnOutsideClick = true;
-          setPresentHint(presentAgainHintKey());
         });
       },
     });
@@ -510,7 +486,7 @@ export function createPlayer(ctx) {
     // why: 1º clique fora para o tour; 2º clique fora volta ao editor (sem depender só do Esc).
     els.stage?.addEventListener("click", (e) => {
       if (!isPresenting() || driverObj || !exitOnOutsideClick) return;
-      if (e.target.closest(".canvas-frame, .driver-popover, #present-chrome")) return;
+      if (e.target.closest(".canvas-frame, .driver-popover")) return;
       exitOnOutsideClick = false;
       onRequestExit?.();
     });

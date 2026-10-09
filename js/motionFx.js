@@ -82,7 +82,6 @@ if (M && !reduce) {
     hotspot: "pop",
     "click-point": "pop",
     "canvas-caption": "rise",
-    "present-chrome": "down",
     "rotate-hint": "fade",
     toast: "pop",
     "canvas-missing": "fade",

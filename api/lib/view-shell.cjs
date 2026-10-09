@@ -84,9 +84,9 @@ function renderViewPage({ id, name, origin, missing }) {
   </script>
   <link rel="icon" href="/trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="stylesheet" href="/a/12/vendor/driver/driver.css" />
-  <link rel="stylesheet" href="/a/12/css/theme.css" />
-  <link rel="stylesheet" href="/a/12/css/app.css" />
+  <link rel="stylesheet" href="/a/13/vendor/driver/driver.css" />
+  <link rel="stylesheet" href="/a/13/css/theme.css" />
+  <link rel="stylesheet" href="/a/13/css/app.css" />
   <script>window.__GF_SHARE = ${JSON.stringify({ id: id || null, name: name || null, missing: Boolean(missing) })};</script>
 </head>
 <body class="view-share">
@@ -99,7 +99,6 @@ function renderViewPage({ id, name, origin, missing }) {
 
   <main id="view-editor" class="view view-editor is-presenting">
     <section class="canvas-wrap">
-      <p class="present-hint" id="present-chrome" data-i18n="view.escHint">Clique fora ou Esc para recomeçar</p>
       <div class="canvas-stage" id="canvas-stage">
         <div class="view-share-status" id="view-share-status"${missing ? "" : ""}>
           <p id="view-share-status-text">${missing ? escapeHtml("Este link não está mais disponível.") : "Carregando o tour…"}</p>
@@ -140,8 +139,8 @@ function renderViewPage({ id, name, origin, missing }) {
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="/a/12/vendor/driver/driver.js.iife.js"></script>
-  <script type="module" src="/a/12/js/viewApp.js"></script>
+  <script src="/a/13/vendor/driver/driver.js.iife.js"></script>
+  <script type="module" src="/a/13/js/viewApp.js"></script>
 </body>
 </html>
 `;

@@ -432,7 +432,6 @@ function paintChrome() {
   const moreEditorOnly = document.getElementById("more-editor-only");
   const projectLabel = document.getElementById("topbar-project");
   const title = document.getElementById("topbar-title");
-  const presentChrome = document.getElementById("present-chrome");
   const presentClose = document.getElementById("present-close");
   const rotateHint = document.getElementById("rotate-hint");
   const compact = isCompactTouch();
@@ -446,7 +445,6 @@ function paintChrome() {
   actionsLibrary.hidden = view !== "library";
   if (navEditor) navEditor.hidden = view !== "editor" || presenting || compact;
   if (moreEditorOnly) moreEditorOnly.hidden = view !== "editor" || presenting || compact;
-  if (presentChrome) presentChrome.hidden = !presenting || view !== "editor";
   if (presentClose) presentClose.hidden = !presenting || view !== "editor" || !compact;
   if (rotateHint) {
     rotateHint.hidden = !presenting || view !== "editor" || !compact || isCompactLandscape();

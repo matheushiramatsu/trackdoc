@@ -111,7 +111,6 @@ async function boot() {
   document.body.classList.add("is-presenting");
   document.getElementById("view-editor")?.classList.add("is-presenting");
   document.getElementById("hotspot")?.classList.add("is-previewing");
-  document.getElementById("present-chrome").hidden = false;
 
   hideStatus();
 
@@ -123,7 +122,6 @@ async function boot() {
     setSelectedIndex: (i) => {
       selectedIndex = i;
     },
-    presentHintKey: "view.escHint",
     onRequestExit: () => {
       // why: na página compartilhada não há editor — Esc/clique fora reinicia o tour
       selectedIndex = 0;

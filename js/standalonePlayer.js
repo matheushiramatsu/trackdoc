@@ -735,7 +735,7 @@ function gfT(key, vars) {
     const overlayOpacity = isDark ? 0.62 : 0.55;
 
     driverObj = factory({
-      popoverClass: "demo-popover",
+      popoverClass: "demo-popover presentation-popover",
       showProgress: true,
       animate: true,
       allowClose: true,
