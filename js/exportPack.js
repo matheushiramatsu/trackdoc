@@ -172,7 +172,7 @@ export async function embedImagesInDemo(demo, onProgress) {
   return next;
 }
 
-function standaloneHtmlShell({ css, driverJs, playerJs, demoJson, appearance }) {
+function standaloneHtmlShell({ css, driverJs, playerJs, demoJson, appearance, projectName }) {
   const mode = appearance === "social" ? "social" : "documento";
   const themeColor = mode === "social" ? "#191919" : "#1732FF";
   return `<!DOCTYPE html>
@@ -181,7 +181,7 @@ function standaloneHtmlShell({ css, driverJs, playerJs, demoJson, appearance }) 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="${themeColor}" />
-  <title>TrackDoc</title>
+  <title>${escapePdfHtml(projectName || "TrackDoc")}</title>
   <style>
 ${css}
   </style>
@@ -189,8 +189,7 @@ ${css}
 <body class="standalone">
   <header class="topbar">
     <div class="topbar-brand">
-      <span class="logo">TrackDoc</span>
-      <span class="topbar-title">${t("player.standaloneTitle")}</span>
+      <span class="topbar-title">${escapePdfHtml(projectName || "")}</span>
     </div>
   </header>
   <main id="view-player" class="view view-player">
@@ -270,7 +269,14 @@ body.standalone .view-player { height: calc(100% - 56px); display: flex; }
 body.standalone .topbar-title { font-size: 0.78rem; }
 `;
   const css = [driverCss, themeCss, appCss, extra].filter(Boolean).join("\n");
-  const html = standaloneHtmlShell({ css, driverJs, playerJs, demoJson, appearance });
+  const html = standaloneHtmlShell({
+    css,
+    driverJs,
+    playerJs,
+    demoJson,
+    appearance,
+    projectName: demo?.name,
+  });
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   downloadBlob(blob, `${slugifyFilename(demo?.name, "demo")}.html`);
   return blob.size;

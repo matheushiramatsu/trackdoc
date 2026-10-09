@@ -1,5 +1,5 @@
 /**
- * GET /api/cron/expire-shares — varre o Blob e apaga tours com mais de 7 dias.
+ * GET /api/cron/expire-shares — varre o Blob e apaga tours com mais de 15 dias.
  * A Vercel chama este path uma vez por dia (Hobby) via vercel.json crons.
  */
 const { timingSafeEqual } = require("node:crypto");

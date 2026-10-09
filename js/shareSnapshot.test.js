@@ -89,11 +89,12 @@ test("createShareIds gera id curto estilo YouTube", () => {
   assert.equal(isShareId("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"), false); // hex inválido
 });
 
-test("link de preview expira 7 dias após a publicação", () => {
+test("link de preview expira 15 dias após a publicação", () => {
   const published = 1_700_000_000_000;
+  assert.equal(SHARE_TTL_MS, 15 * 24 * 60 * 60 * 1000);
+  assert.equal(isShareExpired(published, published + 14 * 24 * 60 * 60 * 1000), false);
   assert.equal(isShareExpired(published, published + SHARE_TTL_MS - 1), false);
   assert.equal(isShareExpired(published, published + SHARE_TTL_MS), true);
-  assert.equal(SHARE_TTL_MS, 7 * 24 * 60 * 60 * 1000);
   assert.equal(isShareExpired(undefined, published), true);
   assert.equal(isShareExpired(0, published), true);
 });

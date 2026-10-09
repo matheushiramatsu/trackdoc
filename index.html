@@ -54,15 +54,16 @@
   <link rel="icon" href="trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <script async src="https://tally.so/widgets/embed.js"></script>
-  <link rel="stylesheet" href="a/13/vendor/driver/driver.css" />
-  <link rel="stylesheet" href="a/13/css/theme.css" />
-  <link rel="stylesheet" href="a/13/css/app.css" />
-  <link rel="stylesheet" href="a/13/js/dock-runtime/dock.css" />
+  <link rel="stylesheet" href="a/15/vendor/driver/driver.css" />
+  <link rel="stylesheet" href="a/15/css/theme.css" />
+  <link rel="stylesheet" href="a/15/css/app.css" />
+  <link rel="stylesheet" href="a/15/js/dock-runtime/dock.css" />
 </head>
 <body class="is-booting">
   <header class="topbar">
     <div class="topbar-brand">
       <span class="logo"><img src="trackdocs-logo-branco.svg" alt="TrackDoc" /></span>
+      <span class="topbar-title" id="topbar-title" hidden></span>
       <nav class="topbar-nav" id="topbar-nav-editor" hidden aria-label="Projeto">
         <button type="button" class="btn btn-ghost btn-nav-back" id="btn-projects" title="Projetos" data-i18n-title="topbar.projects">
           <svg class="btn-ico" aria-hidden="true"><use href="#i-folder"></use></svg>
@@ -115,7 +116,7 @@
             <span data-i18n="topbar.share">Compartilhar</span>
           </summary>
           <div class="export-panel-body">
-            <p class="share-expiry-note" data-i18n="share.expiresNote">Este link fica no ar por 7 dias a partir da publicação. Atualizar o tour não prolonga o prazo.</p>
+            <p class="share-expiry-note" data-i18n="share.expiresNote">Este link fica no ar por 15 dias a partir da publicação. Atualizar o tour não prolonga o prazo.</p>
             <button type="button" class="export-option" id="btn-share-publish">
               <strong data-i18n="share.linkTitle">Link do preview</strong>
               <span data-i18n="share.linkDesc">Endereço só para ver o tour — sem editor.</span>
@@ -877,10 +878,10 @@
     </symbol>
   </svg>
 
-  <script src="a/13/vendor/driver/driver.js.iife.js"></script>
-  <script src="a/13/vendor/motion/motion.js"></script>
-  <script type="module" src="a/13/js/dock-runtime/dock.js"></script>
-  <script type="module" src="a/13/js/app.js"></script>
-  <script type="module" src="a/13/js/motionFx.js"></script>
+  <script src="a/15/vendor/driver/driver.js.iife.js"></script>
+  <script src="a/15/vendor/motion/motion.js"></script>
+  <script type="module" src="a/15/js/dock-runtime/dock.js"></script>
+  <script type="module" src="a/15/js/app.js"></script>
+  <script type="module" src="a/15/js/motionFx.js"></script>
 </body>
 </html>

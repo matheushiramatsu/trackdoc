@@ -107,6 +107,7 @@ async function boot() {
 
   const title = document.getElementById("topbar-title");
   if (title) title.textContent = demo.name || t("view.title");
+  document.title = demo.name || t("view.title");
 
   document.body.classList.add("is-presenting");
   document.getElementById("view-editor")?.classList.add("is-presenting");

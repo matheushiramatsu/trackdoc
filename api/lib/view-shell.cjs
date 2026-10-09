@@ -13,9 +13,7 @@ function renderViewPage({ id, name, origin, missing }) {
   const base = String(origin || "").replace(/\/$/, "");
   const title = missing
     ? "TrackDoc"
-    : name
-      ? `${name} — TrackDoc`
-      : "TrackDoc — Tour";
+    : name || "TrackDoc";
   const description = missing
     ? "Este link não está mais disponível."
     : name
@@ -84,15 +82,14 @@ function renderViewPage({ id, name, origin, missing }) {
   </script>
   <link rel="icon" href="/trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="stylesheet" href="/a/13/vendor/driver/driver.css" />
-  <link rel="stylesheet" href="/a/13/css/theme.css" />
-  <link rel="stylesheet" href="/a/13/css/app.css" />
+  <link rel="stylesheet" href="/a/15/vendor/driver/driver.css" />
+  <link rel="stylesheet" href="/a/15/css/theme.css" />
+  <link rel="stylesheet" href="/a/15/css/app.css" />
   <script>window.__GF_SHARE = ${JSON.stringify({ id: id || null, name: name || null, missing: Boolean(missing) })};</script>
 </head>
 <body class="view-share">
   <header class="topbar">
     <div class="topbar-brand">
-      <a class="logo" href="/" aria-label="TrackDoc"><img src="/trackdocs-logo-branco.svg" alt="TrackDoc" /></a>
       <span class="topbar-title" id="topbar-title">${missing ? escapeHtml("Este link não está mais disponível.") : safeName || "Carregando o tour…"}</span>
     </div>
   </header>
@@ -139,8 +136,8 @@ function renderViewPage({ id, name, origin, missing }) {
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="/a/13/vendor/driver/driver.js.iife.js"></script>
-  <script type="module" src="/a/13/js/viewApp.js"></script>
+  <script src="/a/15/vendor/driver/driver.js.iife.js"></script>
+  <script type="module" src="/a/15/js/viewApp.js"></script>
 </body>
 </html>
 `;

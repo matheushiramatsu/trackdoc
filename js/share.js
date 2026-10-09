@@ -106,7 +106,7 @@ export async function publishShareLink(project, { onProgress } = {}) {
     });
   } catch (err) {
     if (err.code !== "expired" || !body.id) throw err;
-    // why: depois de 7 dias o id antigo foi apagado; publicar de novo abre outro prazo
+    // why: depois de 15 dias o id antigo foi apagado; publicar de novo abre outro prazo
     renewed = true;
     tokenRes = await apiJson("/api/share", {
       method: "POST",

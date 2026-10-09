@@ -6,7 +6,7 @@ const { createHash, randomBytes, timingSafeEqual } = require("node:crypto");
 const SHARE_PREFIX = "shares";
 const MAX_SHARE_BYTES = 80 * 1024 * 1024;
 /** Prazo do link /v/ hospedado, contado da primeira publicação. */
-const SHARE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const SHARE_TTL_MS = 15 * 24 * 60 * 60 * 1000;
 /** 8 bytes → 11 chars base64url (estilo YouTube). */
 const SHORT_ID_BYTES = 8;
 

@@ -38,7 +38,8 @@ import {
 } from "./themes.js";
 import { createEditor } from "./editor.js";
 import { createPlayer } from "./player.js";
-import { exportStandaloneHtml, exportVideo, exportPdf } from "./exportPack.js";
+import { embedImagesInDemo, exportStandaloneHtml, exportVideo, exportPdf } from "./exportPack.js";
+import { buildProjectClipboardContent } from "./projectClipboard.js";
 import { ensureNarration, ensurePlayback } from "./playback.js";
 import { createHistory } from "./history.js";
 import {
@@ -458,8 +459,8 @@ function paintChrome() {
     if (projectLabel) projectLabel.hidden = true;
   } else if (presenting) {
     if (title) {
-      title.hidden = compact;
-      title.textContent = t("topbar.presenting");
+      title.hidden = !project?.name;
+      title.textContent = project?.name || "";
     }
     if (projectLabel) projectLabel.hidden = true;
   } else {
@@ -485,6 +486,7 @@ function enterPresentation(opts = {}) {
     return;
   }
   project.theme = formToTheme(project.theme);
+  document.title = project.name || t("doc.title.editor");
   applyTheme(project.theme);
   editor.stopPreview?.();
   editor.pauseCaption?.();
@@ -504,6 +506,7 @@ function exitPresentation() {
   }
   const returnToLibrary = isCompactTouch() && Boolean(project);
   presenting = false;
+  document.title = t("doc.title.editor");
   player.stop?.();
   document.body.classList.remove("is-presenting");
   document.getElementById("view-editor")?.classList.remove("is-presenting");
@@ -680,6 +683,10 @@ function renderLibrary() {
                 <svg class="btn-ico" aria-hidden="true"><use href="#i-export"></use></svg>
                 Exportar
               </button>
+              <button type="button" class="btn btn-sm" data-action="copy-content" title="${escapeAttr(t("library.copyContent"))}">
+                <svg class="btn-ico" aria-hidden="true"><use href="#i-copy"></use></svg>
+                <span>${escapeHtml(t("library.copyContent"))}</span>
+              </button>
               <button type="button" class="btn btn-sm" data-action="duplicate">
                 <svg class="btn-ico" aria-hidden="true"><use href="#i-copy"></use></svg>
                 Duplicar
@@ -689,6 +696,25 @@ function renderLibrary() {
         </article>`;
     })
     .join("");
+}
+
+function copyProjectContentToClipboard(id) {
+  if (!navigator.clipboard?.write || typeof ClipboardItem !== "function") {
+    return Promise.reject(new Error(t("toast.projectCopyUnavailable")));
+  }
+
+  // Promise-backed ClipboardItems let the write start during the click gesture,
+  // while screenshots are still being embedded into the rich HTML payload.
+  const content = getProject(id).then(async (project) => {
+    if (!project) throw new Error(t("toast.projectNotFound"));
+    const demo = await embedImagesInDemo(projectToDemoPayload(project));
+    return buildProjectClipboardContent(demo);
+  });
+  const item = new ClipboardItem({
+    "text/html": content.then(({ html }) => new Blob([html], { type: "text/html" })),
+    "text/plain": content.then(({ text }) => new Blob([text], { type: "text/plain;charset=utf-8" })),
+  });
+  return navigator.clipboard.write([item]);
 }
 
 function clearBootGate() {
@@ -992,6 +1018,17 @@ function bindChrome() {
         if (!proj) return;
         exportDemo(projectToDemoPayload(proj), { filename: proj.name });
         toast(t("toast.jsonExported"));
+        return;
+      }
+      if (action === "copy-content") {
+        toast(t("toast.copyingProject"));
+        try {
+          await copyProjectContentToClipboard(id);
+          toast(t("toast.projectCopied"));
+        } catch (err) {
+          console.error(err);
+          toast(err?.message || t("toast.projectCopyFailed"));
+        }
         return;
       }
       if (action === "duplicate") {

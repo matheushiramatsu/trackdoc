@@ -57,7 +57,7 @@ O Dock do editor usa React, TypeScript, Tailwind CSS v4 e a estrutura shadcn. Co
 
 - **HTML navegável** — um arquivo único com o tour
 - **Vídeo MP4** — frames do tour via WebCodecs; se o encoder não existir, cai em `MediaRecorder` (pode sair WebM)
-- **Link do preview** — no menu Compartilhar; publica um endereço curto `/v/…` só para ver o tour (requer Blob na Vercel)
+- **Link do preview** — no menu Compartilhar; publica um endereço curto `/v/…` só para ver o tour por 15 dias (requer Blob na Vercel)
 
 ## Testes
 
