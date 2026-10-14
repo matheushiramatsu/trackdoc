@@ -5,6 +5,7 @@ import { applyTheme, normalizeSteps } from "./store.js";
 import { ensureNarration, ensurePlayback } from "./playback.js";
 import { createPlayer } from "./player.js";
 import { initLocale, applyI18n, t } from "./i18n.js";
+import { mountFullscreenToggle } from "./fullscreenToggle.js";
 
 function parseShareId() {
   const boot = typeof window !== "undefined" ? window.__GF_SHARE : null;
@@ -112,6 +113,7 @@ async function boot() {
   document.body.classList.add("is-presenting");
   document.getElementById("view-editor")?.classList.add("is-presenting");
   document.getElementById("hotspot")?.classList.add("is-previewing");
+  mountFullscreenToggle(document.querySelector("#view-editor .canvas-wrap"));
 
   hideStatus();
 

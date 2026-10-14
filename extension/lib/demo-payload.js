@@ -65,7 +65,6 @@ export function buildDemoPayload({ name, shots }) {
     if (!shot?.dataUrl || !shot.imageId || !shot.stepId) {
       throw new Error(t("ext.incompleteCapture"));
     }
-    const label = shot.label || t("ext.defaultStep", { n: index + 1 });
     const point = shot.clickPoint || { x: 47, y: 44 };
     customImages[shot.imageId] = {
       name: shot.name || `passo-${index + 1}.png`,
@@ -75,14 +74,15 @@ export function buildDemoPayload({ name, shots }) {
     steps.push({
       id: shot.stepId,
       scene: 1,
-      label,
+      // Título e descrição ficam em branco para o autor escrever; o editor mostra "Passo" na lista.
+      label: "",
       type: "screen",
       image: `custom:${shot.imageId}`,
       hotspot: hotspotAround(point),
       clickPoint: { x: point.x, y: point.y },
       popover: {
-        title: label,
-        description: t("editor.editExplain"),
+        title: "",
+        description: "",
         side: "bottom",
         align: "center",
       },

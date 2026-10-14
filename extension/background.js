@@ -69,6 +69,7 @@ function publicState(extra = {}) {
   return {
     ok: true,
     active: Boolean(session?.active),
+    paused: Boolean(session?.active && session?.paused),
     count: session?.shots?.length || 0,
     awaitingHotspot: Boolean(last?.awaitingHotspot),
     editorOrigin: settings?.editorOrigin || DEFAULT_EDITOR_ORIGIN,
@@ -86,6 +87,8 @@ function captureUi() {
     capture: t("ext.barCapture"),
     create: t("ext.create"),
     append: t("ext.append"),
+    pause: t("ext.pause"),
+    resume: t("ext.resume"),
     download: t("ext.download"),
     undo: t("ext.undo"),
     cancel: t("ext.cancel"),
@@ -93,6 +96,7 @@ function captureUi() {
     stepsN: t("ext.stepsN", { n: "{n}" }),
     hint: t("ext.barHint"),
     hintHotspot: t("ext.barHintHotspot"),
+    hintPaused: t("ext.barHintPaused"),
     lostApp: t("ext.barLostApp"),
     lostExt: t("ext.barLostExt"),
   };
@@ -181,6 +185,7 @@ async function start(tab) {
     });
   }
   session.active = true;
+  session.paused = false;
   await saveSession();
   try {
     await inject(tab.id);
@@ -203,6 +208,8 @@ async function captureShot(tab, meta, { withClick }) {
     return publicState({ ok: false, error: t("ext.pageBlocked") });
   }
   if (captureLock) return { ignore: true };
+  // Capturar também retoma uma captura pausada: a tela atual (com o modal aberto) vira o passo.
+  session.paused = false;
   if (Date.now() - lastCaptureAt < 400) {
     const state = publicState({ status: t("ext.prevValid") });
     await broadcast(state);
@@ -277,9 +284,19 @@ async function markHotspot(meta) {
 
 async function onPageClick(msg, sender) {
   if (!session.active) return publicState({ active: false, show: false });
+  if (session.paused) return publicState();
   const tab = sender.tab;
   if (nextClickAction(session.shots) === "mark") return markHotspot(msg);
   return captureShot(tab, msg, { withClick: true });
+}
+
+async function setPaused(paused) {
+  if (!session.active) return publicState({ ok: false, error: t("ext.notActive") });
+  session.paused = paused;
+  await saveSession();
+  const state = publicState({ status: paused ? t("ext.paused") : t("ext.resumed") });
+  await broadcast(state);
+  return state;
 }
 
 async function undo() {
@@ -562,6 +579,10 @@ async function handle(msg, sender) {
       return captureShot(sender.tab, { title: msg.title, url: sender.tab?.url }, { withClick: false });
     case "PAGE_CLICK":
       return onPageClick(msg, sender);
+    case "PAUSE":
+      return setPaused(true);
+    case "RESUME":
+      return setPaused(false);
     case "UNDO":
       return undo();
     case "CANCEL":

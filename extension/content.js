@@ -4,6 +4,7 @@
 
   let active = false;
   let awaitingHotspot = false;
+  let paused = false;
 
   const host = document.createElement("div");
   host.setAttribute("data-guia-capture", "");
@@ -51,6 +52,8 @@
     }
     button.primary { background: #1732ff; border-color: #1732ff; color: #fff; }
     button.danger { color: #dc2626; }
+    .bar.is-paused { border-color: #f59e0b; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.22); }
+    .bar.is-paused .count { color: #b45309; }
   `;
 
   const bar = document.createElement("div");
@@ -65,6 +68,8 @@
     capture: "Capturar",
     create: "Criar projeto",
     append: "Copiar para o projeto",
+    pause: "Pausar",
+    resume: "Retomar",
     undo: "Desfazer",
     download: "Baixar JSON",
     cancel: "Cancelar",
@@ -72,6 +77,7 @@
     stepsN: "{n} passos",
     hint: "Capturar congela esta tela. O clique seguinte marca o destaque.",
     hintHotspot: "Clique no elemento do destaque. Esse clique não tira outra foto.",
+    hintPaused: "Captura pausada. Abra modais e menus à vontade; Capturar volta a gravar.",
     lostApp: "A captura perdeu a conexão com o app.",
     lostExt: "A captura perdeu a conexão. Abra de novo o ícone da extensão.",
   };
@@ -90,6 +96,7 @@
   actions.className = "actions";
   for (const spec of [
     ["capture", "capture", "primary"],
+    ["pause", "pause", ""],
     ["create", "create", "primary"],
     ["append", "append", "primary"],
     ["undo", "undo", ""],
@@ -125,20 +132,26 @@
     if (!state?.active || state.show === false) {
       active = false;
       awaitingHotspot = false;
+      paused = false;
       unmount();
       return;
     }
     active = true;
     awaitingHotspot = Boolean(state.awaitingHotspot);
+    paused = Boolean(state.paused);
     mount();
     ui = { ...uiFallback, ...(state.ui || {}) };
     title.textContent = ui.title;
     for (const button of actions.querySelectorAll("button")) {
       button.textContent = ui[button.dataset.label] || button.textContent;
     }
+    const pauseButton = actions.querySelector('[data-action="pause"]');
+    pauseButton.textContent = paused ? ui.resume : ui.pause;
+    pauseButton.setAttribute("aria-pressed", String(paused));
+    bar.classList.toggle("is-paused", paused);
     const count = state.count || 0;
     countEl.textContent = count === 1 ? ui.stepOne : String(ui.stepsN).replace("{n}", String(count));
-    hintEl.textContent = awaitingHotspot ? ui.hintHotspot : ui.hint;
+    hintEl.textContent = paused ? ui.hintPaused : awaitingHotspot ? ui.hintHotspot : ui.hint;
     statusEl.textContent = state.error || state.status || "";
     statusEl.classList.toggle("is-error", Boolean(state.error));
   }
@@ -178,6 +191,7 @@
     if (action === "capture") {
       send({ type: "CAPTURE_FROM_PAGE", title: document.title, url: location.href });
     }
+    if (action === "pause") send({ type: paused ? "RESUME" : "PAUSE" });
     if (action === "create") send({ type: "CREATE_PROJECT" });
     if (action === "append") send({ type: "APPEND_TO_PROJECT" });
     if (action === "download") send({ type: "DOWNLOAD_JSON" });
@@ -188,7 +202,8 @@
   document.addEventListener(
     "pointerdown",
     (event) => {
-      if (!active || event.button !== 0) return;
+      // Pausada, a página fica livre para abrir modais e menus sem gerar passos.
+      if (!active || paused || event.button !== 0) return;
       if (event.composedPath().includes(host)) return;
       const payload = {
         type: "PAGE_CLICK",

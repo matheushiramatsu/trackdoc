@@ -7,6 +7,8 @@ const countEl = document.getElementById("count");
 const statusEl = document.getElementById("status");
 const nameEl = document.getElementById("project-name");
 const originEl = document.getElementById("editor-origin");
+const pauseEl = document.getElementById("pause");
+let paused = false;
 
 originEl.placeholder = DEFAULT_EDITOR_ORIGIN;
 if (!originEl.value) originEl.value = DEFAULT_EDITOR_ORIGIN;
@@ -15,6 +17,9 @@ function paint(state) {
   const active = Boolean(state?.active);
   idle.hidden = active;
   live.hidden = !active;
+  paused = Boolean(state?.paused);
+  pauseEl.textContent = paused ? t("ext.resume") : t("ext.pause");
+  pauseEl.setAttribute("aria-pressed", String(paused));
   const count = state?.count || 0;
   countEl.textContent = active
     ? count === 1
@@ -100,6 +105,12 @@ document.getElementById("start").addEventListener("click", async () => {
 document.getElementById("shot").addEventListener("click", async () => {
   const tab = await activeTab();
   const state = await send({ type: "CAPTURE_NOW", tabId: tab?.id });
+  paint(state);
+  closeIfOk(state);
+});
+
+pauseEl.addEventListener("click", async () => {
+  const state = await send({ type: paused ? "RESUME" : "PAUSE" });
   paint(state);
   closeIfOk(state);
 });

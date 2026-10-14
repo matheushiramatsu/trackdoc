@@ -62,6 +62,7 @@ import {
 } from "./extensionBanner.js";
 import { COMPACT_LANDSCAPE_MQ, COMPACT_TOUCH_MQ, isCompactLandscape, isCompactTouch } from "./compact.js";
 import { initButtonMotion } from "./buttonMotion.js";
+import { exitFullscreen, mountFullscreenToggle } from "./fullscreenToggle.js";
 
 let project = null;
 let selectedIndex = 0;
@@ -421,6 +422,7 @@ const player = createPlayer({
 
 let chromeView = "library";
 let presenting = false;
+let fullscreenToggle = null;
 
 function paintChrome() {
   const view = chromeView;
@@ -450,6 +452,7 @@ function paintChrome() {
   if (rotateHint) {
     rotateHint.hidden = !presenting || view !== "editor" || !compact || isCompactLandscape();
   }
+  fullscreenToggle?.sync();
 
   if (view === "library") {
     if (title) {
@@ -507,6 +510,7 @@ function exitPresentation() {
   const returnToLibrary = isCompactTouch() && Boolean(project);
   presenting = false;
   document.title = t("doc.title.editor");
+  void exitFullscreen();
   player.stop?.();
   document.body.classList.remove("is-presenting");
   document.getElementById("view-editor")?.classList.remove("is-presenting");
@@ -698,21 +702,21 @@ function renderLibrary() {
     .join("");
 }
 
-function copyProjectContentToClipboard(id) {
+function copyProjectContentToClipboard(source) {
   if (!navigator.clipboard?.write || typeof ClipboardItem !== "function") {
     return Promise.reject(new Error(t("toast.projectCopyUnavailable")));
   }
 
   // Promise-backed ClipboardItems let the write start during the click gesture,
   // while screenshots are still being embedded into the rich HTML payload.
-  const content = getProject(id).then(async (project) => {
-    if (!project) throw new Error(t("toast.projectNotFound"));
-    const demo = await embedImagesInDemo(projectToDemoPayload(project));
+  const content = (typeof source === "string" ? getProject(source) : Promise.resolve(source)).then(async (copiedProject) => {
+    if (!copiedProject) throw new Error(t("toast.projectNotFound"));
+    const demo = await embedImagesInDemo(projectToDemoPayload(copiedProject));
     return buildProjectClipboardContent(demo);
   });
   const item = new ClipboardItem({
     "text/html": content.then(({ html }) => new Blob([html], { type: "text/html" })),
-    "text/plain": content.then(({ text }) => new Blob([text], { type: "text/plain;charset=utf-8" })),
+    "text/plain": content.then(({ text }) => new Blob([text], { type: "text/plain" })),
   });
   return navigator.clipboard.write([item]);
 }
@@ -840,6 +844,9 @@ function bindChrome() {
   document.getElementById("btn-undo")?.addEventListener("click", () => undoEdit());
   document.getElementById("btn-redo")?.addEventListener("click", () => redoEdit());
   document.getElementById("present-close")?.addEventListener("click", () => exitPresentation());
+  fullscreenToggle = mountFullscreenToggle(document.querySelector("#view-editor .canvas-wrap"), {
+    isActive: () => presenting && chromeView === "editor",
+  });
 
   if (window.matchMedia) {
     const onCompactChrome = () => {
@@ -1141,6 +1148,26 @@ function bindChrome() {
   function closeExportMenu() {
     if (exportPanel) exportPanel.open = false;
   }
+
+  document.getElementById("btn-copy-project-content")?.addEventListener("click", async (event) => {
+    closeExportMenu();
+    if (!project) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    toast(t("toast.copyingProject"));
+    try {
+      // Copy the current editor state, including edits not yet autosaved.
+      await copyProjectContentToClipboard(project);
+      toast(t("toast.projectCopied"));
+    } catch (err) {
+      console.error(err);
+      toast(err?.message || t("toast.projectCopyFailed"));
+    } finally {
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+    }
+  });
 
   function showExportOverlay(title, { cancelable = false, preview = false } = {}) {
     overlayTitle.textContent = title;

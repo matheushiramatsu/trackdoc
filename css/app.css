@@ -3084,6 +3084,54 @@ body.view-share .caption-bar {
   display: none !important;
 }
 
+.present-fullscreen {
+  position: fixed;
+  /* Abaixo da topbar, que no preview ainda mostra o botão de aparência no canto. */
+  top: calc(68px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  z-index: 1000000012;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--ns-button-text) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ns-overlay) 78%, transparent);
+  color: var(--ns-button-text);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* buttonMotion põe position: relative; o botão precisa continuar fixo no canto. */
+.present-fullscreen.has-origin-motion {
+  position: fixed;
+}
+
+/* driver.css desliga pointer-events em toda a página durante o tour. */
+.driver-active .present-fullscreen {
+  pointer-events: auto;
+}
+
+.present-fullscreen svg {
+  pointer-events: none;
+}
+
+.present-fullscreen:hover,
+.present-fullscreen:focus-visible {
+  background: var(--ns-overlay);
+}
+
+.present-fullscreen svg {
+  width: 20px;
+  height: 20px;
+}
+
+.present-fullscreen[hidden] {
+  display: none !important;
+}
+
 .rotate-hint {
   display: none;
   position: fixed;

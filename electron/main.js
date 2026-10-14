@@ -32,6 +32,7 @@ function publicState(extra = {}) {
   return {
     ok: true,
     active: Boolean(captureSession.active),
+    paused: Boolean(captureSession.active && captureSession.paused),
     count: captureSession.shots.length,
     awaitingHotspot: Boolean(last?.awaitingHotspot),
     projectName: captureSession.projectName || "",
@@ -178,6 +179,8 @@ async function captureShot(meta, { withClick }) {
     return publicState({ ok: false, error: "Abra uma página http ou https." });
   }
 
+  // Capturar também retoma uma captura pausada.
+  captureSession.paused = false;
   await hideOverlay();
   let dataUrl;
   try {
@@ -228,7 +231,18 @@ async function handlePageMessage(msg) {
       return publicState();
     case "CAPTURE_FROM_PAGE":
       return captureShot(msg, { withClick: false });
+    case "PAUSE":
+    case "RESUME": {
+      if (!captureSession.active) return publicState({ ok: false, error: "A captura não está ativa." });
+      captureSession.paused = msg.type === "PAUSE";
+      const state = publicState({
+        status: captureSession.paused ? "Captura pausada. Cliques não viram passos." : "Captura retomada.",
+      });
+      broadcastState(state);
+      return state;
+    }
     case "PAGE_CLICK": {
+      if (captureSession.paused) return publicState();
       const { nextClickAction } = await loadDemoPayloadHelpers();
       if (nextClickAction(captureSession.shots) === "mark") return markHotspot(msg);
       return captureShot(msg, { withClick: true });

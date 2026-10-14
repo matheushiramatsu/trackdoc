@@ -6,7 +6,7 @@ import {
   nextClickAction,
   pointFromClick,
 } from "./demo-payload.js";
-import { setLocale, t } from "./i18n.js";
+import { setLocale } from "./i18n.js";
 
 setLocale("pt", { persist: false });
 
@@ -62,7 +62,9 @@ test("payload liga cada passo à imagem embutida", () => {
   assert.equal(payload.steps[0].image, "custom:img-a");
   assert.equal(payload.customImages["img-a"].dataUrl, "data:image/jpeg;base64,aaa");
   assert.deepEqual(payload.steps[0].clickPoint, { x: 25, y: 40 });
-  assert.equal(payload.steps[0].popover.description, t("editor.editExplain"));
+  assert.equal(payload.steps[0].label, "");
+  assert.equal(payload.steps[0].popover.title, "");
+  assert.equal(payload.steps[0].popover.description, "");
   assert.equal(payload.theme.presetId, "documento");
 });
 
