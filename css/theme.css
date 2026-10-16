@@ -79,7 +79,7 @@
   color: var(--demo-popover-text) !important;
   border-radius: 4px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
-  max-width: 360px;
+  max-width: min(360px, calc(100vw - 24px));
   font-family: var(--ns-font);
   /* why: acima do frame/imagem no preview — inclusive com zoom (transform) */
   z-index: 1000000020 !important;
@@ -94,9 +94,29 @@
   right: auto !important;
   bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
   left: 50% !important;
-  width: min(360px, calc(100vw - 24px));
+  width: clamp(240px, 24vw, 420px);
   max-width: calc(100vw - 24px);
+  max-height: min(40dvh, calc(100dvh - 32px));
+  padding: 12px 14px;
+  overflow: hidden;
   transform: translateX(-50%) translateZ(0) !important;
+}
+
+/* why: texto do popover escala com a janela no preview */
+.driver-popover.demo-popover.presentation-popover .driver-popover-title {
+  font-size: clamp(13px, 1vw, 18px);
+  padding-right: 22px;
+}
+
+.driver-popover.demo-popover.presentation-popover .driver-popover-description {
+  font-size: clamp(11.5px, 0.85vw, 15px);
+  line-height: 1.35;
+  /* why: popover ocupa no máx. 40dvh; título+rodapé ~110px, resto rola */
+  max-height: max(48px, calc(min(40dvh, 100dvh - 32px) - 110px));
+}
+
+.driver-popover.demo-popover.presentation-popover .driver-popover-footer {
+  margin-top: 10px;
 }
 
 .driver-popover.presentation-popover .driver-popover-arrow {
@@ -121,6 +141,42 @@
   color: var(--demo-popover-text) !important;
   font-size: 13.5px;
   line-height: 1.45;
+  /* why: texto longo rola dentro do popover em vez de estourar a janela; título/rodapé ficam visíveis */
+  max-height: max(72px, calc(100dvh - 190px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  scrollbar-width: thin;
+}
+
+/* why: janela menor → popover menor */
+@media (max-width: 700px), (max-height: 600px) {
+  .driver-popover.demo-popover {
+    min-width: 0;
+    max-width: min(280px, calc(100vw - 24px));
+    padding: 12px 14px;
+  }
+
+  .driver-popover.demo-popover .driver-popover-title {
+    font-size: 14px;
+    padding-right: 22px;
+  }
+
+  .driver-popover.demo-popover .driver-popover-description {
+    font-size: 12px;
+    line-height: 1.35;
+    max-height: max(56px, calc(100dvh - 160px));
+  }
+
+  .driver-popover.demo-popover .driver-popover-footer {
+    margin-top: 10px;
+  }
+}
+
+@media (max-height: 420px) {
+  .driver-popover.demo-popover .driver-popover-description {
+    max-height: max(40px, calc(100dvh - 130px));
+  }
 }
 
 .driver-popover.demo-popover .driver-popover-footer {
