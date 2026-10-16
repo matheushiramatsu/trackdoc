@@ -1148,9 +1148,25 @@ body.is-presenting .ext-banner {
   height: 100%;
 }
 
+/* why: preview acompanha a janela — reserva do popover e do quadro escalam com vw/vh */
+.view-editor.is-presenting {
+  --pp-reserve: clamp(120px, 24vh, 240px);
+}
+
 .view-editor.is-presenting .canvas-stage,
 body.standalone .player-stage {
-  padding-bottom: 168px;
+  padding: clamp(8px, 2vmin, 24px);
+  padding-bottom: var(--pp-reserve, 168px);
+}
+
+.view-editor.is-presenting .canvas-frame img,
+.view-editor.is-presenting .slide-card {
+  max-width: 100cqw;
+  max-height: calc(100dvh - var(--pp-reserve) - clamp(48px, 8vh, 96px));
+}
+
+.view-editor.is-presenting .slide-card {
+  padding: clamp(20px, 5vmin, 56px) clamp(24px, 6vmin, 64px) clamp(32px, 8vmin, 80px) clamp(20px, 4.5vmin, 48px);
 }
 
 body.is-presenting .topbar .logo {

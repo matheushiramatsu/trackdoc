@@ -330,6 +330,8 @@ export function createPlayer(ctx) {
       showProgress: true,
       animate: true,
       allowClose: true,
+      // why: clique fora do popover não deve encerrar o tour; saída por Esc ou botão fechar.
+      overlayClickBehavior: "none",
       // why: setas tratadas em keydown abaixo — o keyup nativo do driver falhava no próximo com onNextClick async.
       allowKeyboardControl: false,
       overlayColor: veil.color,
