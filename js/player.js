@@ -24,7 +24,6 @@ export function createPlayer(ctx) {
     slideBody: document.getElementById("canvas-slide-body"),
     hotspot: document.getElementById("hotspot"),
     clickPoint: document.getElementById("click-point"),
-    clickFx: document.getElementById("editor-click-fx"),
     cursor: document.getElementById("editor-sim-cursor"),
     progress: null,
     missing: document.getElementById("canvas-missing"),
@@ -35,7 +34,6 @@ export function createPlayer(ctx) {
     frame: els.frame,
     hotspot: els.hotspot,
     cursor: els.cursor,
-    clickFx: els.clickFx,
   });
 
   const narration = createNarrationController({ captionEl: els.caption });

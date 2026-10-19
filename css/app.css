@@ -2420,63 +2420,12 @@ body.view-share .caption-bar {
   box-shadow: none !important;
 }
 
-.click-fx {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  margin-left: -6px;
-  margin-top: -6px;
-  z-index: 1000000005;
-  pointer-events: none;
-}
-
-.click-fx-ring {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0.2);
-  opacity: 0;
-}
-
-.click-fx-ring {
-  width: 54px;
-  height: 54px;
-  border: 2px solid color-mix(in srgb, var(--ns-accent) 78%, white);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ns-accent) 28%, transparent);
-}
-
-.click-fx-ring-2 {
-  width: 82px;
-  height: 82px;
-  border-width: 1.5px;
-}
-
-.click-fx.is-active .click-fx-ring {
-  animation: click-ripple 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-.click-fx.is-active .click-fx-ring-2 {
-  animation: click-ripple 0.85s 0.06s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-@keyframes click-ripple {
-  0% {
-    transform: translate(-50%, -50%) scale(0.42);
-    opacity: 0.78;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.45);
-    opacity: 0;
-  }
-}
-
 .sim-cursor {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  margin-left: -12px;
-  margin-top: -12px;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  margin-top: -9px;
   border: 2px solid color-mix(in srgb, var(--demo-accent) 78%, white);
   border-radius: 50%;
   background: color-mix(in srgb, var(--demo-accent) 18%, transparent);

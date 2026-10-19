@@ -228,10 +228,6 @@ ${css}
         </div>
         <div class="player-hotspot" id="player-hotspot"></div>
         <div class="player-click-point" id="player-click-point" hidden></div>
-        <div class="click-fx" id="click-fx" hidden aria-hidden="true">
-          <span class="click-fx-ring"></span>
-          <span class="click-fx-ring click-fx-ring-2"></span>
-        </div>
         <div class="sim-cursor" id="sim-cursor" hidden></div>
         <div class="caption-bar" id="player-caption" hidden></div>
       </div>
@@ -789,35 +785,23 @@ function roundRect(ctx, x, y, w, h, r) {
   addRoundRect(ctx, x, y, w, h, r);
 }
 
-function drawCursor(ctx, x, y, pressProgress, rippleProgress, rgb) {
+function drawCursor(ctx, x, y, pressProgress, rgb) {
   const progress = Math.min(1, Math.max(0, pressProgress));
   const sink = progress < 0.42 ? progress / 0.42 : (1 - progress) / 0.58;
   ctx.save();
   ctx.translate(x, y + sink * 2);
   ctx.scale(1 - sink * 0.38, 1 - sink * 0.38);
   ctx.beginPath();
-  ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.arc(0, 0, 8, 0, Math.PI * 2);
   ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`;
   ctx.fill();
   ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.88)`;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.shadowColor = "rgba(0,0,0,0.45)";
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 2;
   ctx.stroke();
   ctx.restore();
-
-  const ripple = Math.min(1, Math.max(0, rippleProgress));
-  for (const delay of [0, 0.16]) {
-    const wave = Math.min(1, Math.max(0, (ripple - delay) / (1 - delay)));
-    if (wave <= 0) continue;
-    const eased = 1 - Math.pow(1 - wave, 2);
-    ctx.beginPath();
-    ctx.arc(x, y, 12 + eased * 26, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${(1 - wave) * 0.72})`;
-    ctx.lineWidth = 1.5 - wave * 0.6;
-    ctx.stroke();
-  }
 }
 
 function hexRgb(hex) {
@@ -1103,11 +1087,7 @@ function renderFrame(ctx, scene, theme) {
         const pressProgress = at >= cursorEnd && at < clickEnd
           ? (at - cursorEnd) / pressDuration
           : 0;
-        const rippleDuration = Math.max(1, clickEnd - cursorEnd + 350);
-        const rippleProgress = at >= cursorEnd
-          ? Math.min(1, (at - cursorEnd) / rippleDuration)
-          : 0;
-        drawCursor(ctx, cx, cy, pressProgress, rippleProgress, rgb);
+        drawCursor(ctx, cx, cy, pressProgress, rgb);
       }
     }
   }

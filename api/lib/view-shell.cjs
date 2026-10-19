@@ -82,9 +82,9 @@ function renderViewPage({ id, name, origin, missing }) {
   </script>
   <link rel="icon" href="/trackdocs-icone-app.svg" type="image/svg+xml" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="stylesheet" href="/a/18/vendor/driver/driver.css" />
-  <link rel="stylesheet" href="/a/18/css/theme.css" />
-  <link rel="stylesheet" href="/a/18/css/app.css" />
+  <link rel="stylesheet" href="/a/19/vendor/driver/driver.css" />
+  <link rel="stylesheet" href="/a/19/css/theme.css" />
+  <link rel="stylesheet" href="/a/19/css/app.css" />
   <script>window.__GF_SHARE = ${JSON.stringify({ id: id || null, name: name || null, missing: Boolean(missing) })};</script>
 </head>
 <body class="view-share">
@@ -122,10 +122,6 @@ function renderViewPage({ id, name, origin, missing }) {
             <span class="click-point-dot"></span>
             <span class="click-point-label">click</span>
           </div>
-          <div class="click-fx" id="editor-click-fx" hidden aria-hidden="true">
-            <span class="click-fx-ring"></span>
-            <span class="click-fx-ring click-fx-ring-2"></span>
-          </div>
           <div class="sim-cursor" id="editor-sim-cursor" hidden></div>
           <div class="caption-bar" id="canvas-caption" hidden></div>
         </div>
@@ -135,8 +131,8 @@ function renderViewPage({ id, name, origin, missing }) {
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="/a/18/vendor/driver/driver.js.iife.js"></script>
-  <script type="module" src="/a/18/js/viewApp.js"></script>
+  <script src="/a/19/vendor/driver/driver.js.iife.js"></script>
+  <script type="module" src="/a/19/js/viewApp.js"></script>
 </body>
 </html>
 `;

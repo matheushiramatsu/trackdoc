@@ -123,7 +123,6 @@ export function createEditor(ctx) {
     slideBody: document.getElementById("canvas-slide-body"),
     hotspot: document.getElementById("hotspot"),
     clickPoint: document.getElementById("click-point"),
-    clickFx: document.getElementById("editor-click-fx"),
     cursor: document.getElementById("editor-sim-cursor"),
     propType: document.getElementById("prop-type"),
     propImage: document.getElementById("prop-image"),
@@ -182,7 +181,6 @@ export function createEditor(ctx) {
     frame: els.canvasFrame,
     hotspot: els.hotspot,
     cursor: els.cursor,
-    clickFx: els.clickFx,
   });
 
   function currentStep() {
