@@ -790,24 +790,29 @@ function roundRect(ctx, x, y, w, h, r) {
   addRoundRect(ctx, x, y, w, h, r);
 }
 
-function drawCursor(ctx, x, y, pressed) {
+function drawCursor(ctx, x, y, pressProgress, rgb) {
+  const progress = Math.min(1, Math.max(0, pressProgress));
+  const sink = progress < 0.55 ? progress / 0.55 : (1 - progress) / 0.45;
   ctx.save();
-  ctx.translate(x, y);
-  if (pressed) ctx.scale(0.86, 0.86);
+  ctx.translate(x, y + sink * 4);
+  ctx.scale(1 - sink * 0.28, 1 - sink * 0.28);
   ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(6, 18);
-  ctx.lineTo(10, 12);
-  ctx.lineTo(18, 14);
-  ctx.closePath();
-  ctx.fillStyle = "#fff";
-  ctx.strokeStyle = "#111";
-  ctx.lineWidth = 1.4;
+  ctx.arc(0, 0, 13, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.24)`;
+  ctx.fill();
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 3;
   ctx.shadowColor = "rgba(0,0,0,0.45)";
   ctx.shadowBlur = 6;
   ctx.shadowOffsetY = 3;
-  ctx.fill();
   ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, 0, 5.5 * (1 - sink * 0.42), 0, Math.PI * 2);
+  ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  ctx.shadowColor = "rgba(0,0,0,0.28)";
+  ctx.shadowBlur = 3;
+  ctx.shadowOffsetY = 1;
+  ctx.fill();
   ctx.restore();
 }
 
@@ -1090,8 +1095,11 @@ function renderFrame(ctx, scene, theme) {
       const cx = sx + (tx - sx) * ease;
       const cy = sy + (ty - sy) * ease;
       if (at >= cursorStart) {
-        const pressed = at >= cursorEnd && at < clickEnd;
-        drawCursor(ctx, cx, cy, pressed);
+        const pressDuration = Math.max(1, clickEnd - cursorEnd);
+        const pressProgress = at >= cursorEnd && at < clickEnd
+          ? (at - cursorEnd) / pressDuration
+          : 0;
+        drawCursor(ctx, cx, cy, pressProgress, rgb);
       }
 
       if (at >= cursorEnd && at < clickEnd + 350) {

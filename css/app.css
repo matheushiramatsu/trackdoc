@@ -2500,21 +2500,36 @@ body.view-share .caption-bar {
 
 .sim-cursor {
   position: absolute;
-  width: 22px;
-  height: 22px;
-  margin-left: -3px;
-  margin-top: -1px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' stroke='%23111' stroke-width='1.4' d='M4 3l7 17 2.2-6.3L20 12z'/%3E%3C/svg%3E") center / contain no-repeat;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--demo-accent) 24%, transparent);
   z-index: 1000000010;
   pointer-events: none;
   opacity: 0;
-  transform: translate(18px, 18px) scale(0.9);
+  transform: translate(18px, 18px) scale(0.78);
   transition:
     left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     top 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.18s ease,
+    transform 0.12s ease-out,
     opacity 0.2s ease;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--demo-accent) 80%, #111),
+    0 3px 7px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.55);
+}
+
+.sim-cursor::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: inherit;
+  background: var(--demo-accent);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.28),
+    0 1px 2px rgba(255, 255, 255, 0.65);
+  transition: transform 0.18s ease, filter 0.18s ease;
 }
 
 .sim-cursor.is-visible {
@@ -2523,7 +2538,18 @@ body.view-share .caption-bar {
 }
 
 .sim-cursor.is-click {
-  transform: translate(1px, 2px) scale(0.78);
+  animation: cursor-sink 0.22s cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
+}
+
+.sim-cursor.is-click::after {
+  transform: scale(0.58);
+  filter: brightness(0.72);
+}
+
+@keyframes cursor-sink {
+  0% { transform: translate(0, 0) scale(1); }
+  55% { transform: translate(1px, 5px) scale(0.68); }
+  100% { transform: translate(1px, 3px) scale(0.78); }
 }
 
 .toast {
