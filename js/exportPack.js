@@ -789,16 +789,18 @@ function drawCursor(ctx, x, y, pressProgress, rgb) {
   const progress = Math.min(1, Math.max(0, pressProgress));
   const pulse = Math.sin(Math.PI * progress);
   const scale = 1 - 0.36 * pulse;
-  const fillOpacity = pulse;
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
+  const fillRadius = 7 * pulse;
+  if (fillRadius > 0) {
+    ctx.beginPath();
+    ctx.arc(0, 0, fillRadius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+    ctx.fill();
+  }
   ctx.beginPath();
   ctx.arc(0, 0, 9, 0, Math.PI * 2);
-  ctx.globalAlpha = fillOpacity;
-  ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-  ctx.fill();
-  ctx.globalAlpha = 1;
   ctx.strokeStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
   ctx.lineWidth = 2;
   ctx.stroke();

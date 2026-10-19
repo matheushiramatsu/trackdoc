@@ -2446,7 +2446,8 @@ body.view-share .caption-bar {
   inset: 2px;
   border-radius: 50%;
   background: var(--demo-accent);
-  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
   pointer-events: none;
 }
 
@@ -2469,8 +2470,8 @@ body.view-share .caption-bar {
 }
 
 @keyframes cursor-fill {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
+  0%, 100% { transform: scale(0); }
+  50% { transform: scale(1); }
 }
 
 .toast {
