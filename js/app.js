@@ -767,7 +767,7 @@ async function prepareEmailClipboardImages(demo) {
     const markerScale = image.naturalWidth / displayWidth;
     context.save();
     context.translate(canvas.width * clickX / 100, canvas.height * clickY / 100);
-    context.scale(markerScale * 14 / 24, markerScale * 18 / 30);
+    context.scale(markerScale * 7 / 24, markerScale * 9 / 30);
 
     // Replica o ponteiro usado no PDF e o rasteriza para sobreviver ao colar em clientes de e-mail.
     context.beginPath();
