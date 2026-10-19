@@ -356,12 +356,7 @@ function gfT(key, vars) {
       els.cursor.classList.add("is-click");
       if (pressHotspot && els.hotspot) els.hotspot.classList.add("is-pressed");
       await wait(280);
-      els.cursor.classList.remove("is-click");
-      await wait(380);
-      els.cursor.classList.remove("is-visible");
       if (els.hotspot) els.hotspot.classList.remove("is-pressed");
-      await wait(160);
-      reset();
     }
 
     return { reset, animateTo };

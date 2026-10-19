@@ -787,12 +787,12 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function drawCursor(ctx, x, y, pressProgress, rgb) {
   const progress = Math.min(1, Math.max(0, pressProgress));
-  const sink = progress < 0.42 ? progress / 0.42 : (1 - progress) / 0.58;
+  const sink = Math.min(1, progress / 0.42);
   ctx.save();
   ctx.translate(x, y + sink * 2);
-  ctx.scale(1 - sink * 0.38, 1 - sink * 0.38);
+  ctx.scale(1 - sink * 0.28, 1 - sink * 0.28);
   ctx.beginPath();
-  ctx.arc(0, 0, 8, 0, Math.PI * 2);
+  ctx.arc(0, 0, 9, 0, Math.PI * 2);
   ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`;
   ctx.fill();
   ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.88)`;
@@ -1084,7 +1084,7 @@ function renderFrame(ctx, scene, theme) {
       const cy = sy + (ty - sy) * ease;
       if (at >= cursorStart) {
         const pressDuration = Math.max(1, clickEnd - cursorEnd);
-        const pressProgress = at >= cursorEnd && at < clickEnd
+        const pressProgress = at >= cursorEnd
           ? (at - cursorEnd) / pressDuration
           : 0;
         drawCursor(ctx, cx, cy, pressProgress, rgb);
