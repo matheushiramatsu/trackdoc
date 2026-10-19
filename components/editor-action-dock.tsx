@@ -17,6 +17,7 @@ const actions = [
   { id: 'btn-add-images', Icon: ImageIcon },
   { id: 'btn-dup-step', Icon: Copy },
   { id: 'btn-copy-step', Icon: Clipboard },
+  { id: 'btn-copy-selected-content', Icon: Clipboard },
   { id: 'btn-paste-step', Icon: ClipboardPaste },
 ] as const;
 

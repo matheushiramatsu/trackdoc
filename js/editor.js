@@ -106,6 +106,7 @@ export function createEditor(ctx) {
     setSelectedIndex,
     toast,
     onChange,
+    onCopySelectedContent,
     onPlayFrom,
   } = ctx;
 
@@ -195,6 +196,7 @@ export function createEditor(ctx) {
     if (!demo.steps.length) {
       selectedIndices = [];
       selectionAnchor = 0;
+      syncSelectedContentCopyButton();
       return;
     }
     selectedIndices = normalizeIndices(
@@ -203,6 +205,12 @@ export function createEditor(ctx) {
     );
     if (!selectedIndices.length) selectedIndices = [primary];
     selectionAnchor = primary;
+    syncSelectedContentCopyButton();
+  }
+
+  function syncSelectedContentCopyButton() {
+    const button = document.getElementById("btn-copy-selected-content");
+    if (button) button.disabled = selectedIndices.length < 2;
   }
 
   function applySelection(indices, primary) {
@@ -217,6 +225,7 @@ export function createEditor(ctx) {
         : selectedIndices[selectedIndices.length - 1] ?? 0;
     setSelectedIndex(prim);
     selectionAnchor = prim;
+    syncSelectedContentCopyButton();
   }
 
   function selectedSteps() {
@@ -1378,6 +1387,18 @@ export function createEditor(ctx) {
     }
     await putStepClipboard({ steps, step: steps[0], images });
     toast(steps.length > 1 ? t("toast.stepsCopied", { n: steps.length }) : t("toast.stepCopied"));
+  }
+
+  async function copySelectedContentToClipboard() {
+    const demo = getDemo();
+    const indices = selectedSteps();
+    if (indices.length < 2 || typeof onCopySelectedContent !== "function") {
+      toast(t("toast.nothingToCopy"));
+      return;
+    }
+    toast(t("toast.copyingSelection"));
+    await onCopySelectedContent(demo, indices);
+    toast(t("toast.selectedContentCopied", { n: indices.length }));
   }
 
   async function pasteStepFromClipboard() {
@@ -2670,6 +2691,12 @@ export function createEditor(ctx) {
       copyStepToClipboard().catch((err) => {
         console.error(err);
         toast(err?.message || t("toast.nothingToCopy"));
+      });
+    });
+    document.getElementById("btn-copy-selected-content")?.addEventListener("click", () => {
+      copySelectedContentToClipboard().catch((err) => {
+        console.error(err);
+        toast(err?.message || t("toast.projectCopyFailed"));
       });
     });
     document.getElementById("btn-paste-step")?.addEventListener("click", () => {

@@ -406,6 +406,7 @@ const editor = createEditor({
   setSelectedIndex,
   toast,
   onChange,
+  onCopySelectedContent: (demo, indices) => copyProjectContentToClipboard(demo, indices),
   onPlayFrom: (index, opts = {}) => {
     setSelectedIndex(index);
     enterPresentation({ from: index, autoplay: !!opts.autoplay });
@@ -702,7 +703,7 @@ function renderLibrary() {
     .join("");
 }
 
-function copyProjectContentToClipboard(source) {
+function copyProjectContentToClipboard(source, indices = null) {
   if (!navigator.clipboard?.write || typeof ClipboardItem !== "function") {
     return Promise.reject(new Error(t("toast.projectCopyUnavailable")));
   }
@@ -711,8 +712,12 @@ function copyProjectContentToClipboard(source) {
   // while screenshots are still being embedded into the rich HTML payload.
   const content = (typeof source === "string" ? getProject(source) : Promise.resolve(source)).then(async (copiedProject) => {
     if (!copiedProject) throw new Error(t("toast.projectNotFound"));
-    const demo = await embedImagesInDemo(projectToDemoPayload(copiedProject));
-    return buildProjectClipboardContent(demo);
+    const demo = projectToDemoPayload(copiedProject);
+    if (Array.isArray(indices)) {
+      demo.steps = indices.map((index) => copiedProject.steps?.[index]).filter(Boolean);
+    }
+    const embeddedDemo = await embedImagesInDemo(demo);
+    return buildProjectClipboardContent(embeddedDemo);
   });
   const item = new ClipboardItem({
     "text/html": content.then(({ html }) => new Blob([html], { type: "text/html" })),

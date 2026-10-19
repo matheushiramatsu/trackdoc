@@ -62,9 +62,13 @@ export function exportPdf(demo) {
   const muted = pdfColor(theme.text, "#4a4a55");
   const surface = pdfColor(theme.popoverBg, "#ffffff");
   const steps = Array.isArray(demo?.steps) ? demo.steps : [];
+  const stepCount = steps.filter((step) => step?.type !== "slide").length;
   const fontUrl = new URL("vendor/fonts/geist-latin-wght-normal.woff2", document.baseURI).href;
   const fontExtUrl = new URL("vendor/fonts/geist-latin-ext-wght-normal.woff2", document.baseURI).href;
+  let stepNumber = 0;
   const stepHtml = steps.map((step, index) => {
+    const isSlide = step?.type === "slide";
+    const number = isSlide ? "" : String(++stepNumber).padStart(2, "0");
     const title = step?.popover?.title || step?.label || `${t("export.stepTitle")} ${index + 1}`;
     const description = step?.popover?.description || "";
     const src = step?.type === "slide" ? "" : resolveImageSrc(demo, step?.image);
@@ -76,7 +80,7 @@ export function exportPdf(demo) {
         : "";
       image = `<div class="screen-frame"><img class="step-image" src="${escapePdfHtml(new URL(src, document.baseURI).href)}" alt="${escapePdfHtml(title)}">${clickMarker}</div>`;
     }
-    return `<article class="step"><div class="step-heading"><span class="step-number">${String(index + 1).padStart(2, "0")}</span><h2>${escapePdfHtml(title)}</h2></div>${image}${description ? `<p>${escapePdfHtml(description).replace(/\n/g, "<br>")}</p>` : ""}</article>`;
+    return `<article class="step${isSlide ? " step-slide" : ""}"><div class="step-heading">${number ? `<span class="step-number">${number}</span>` : ""}<h2>${escapePdfHtml(title)}</h2></div>${image}${description ? `<p>${escapePdfHtml(description).replace(/\n/g, "<br>")}</p>` : ""}</article>`;
   }).join("");
 
   printWindow.document.open();
@@ -91,8 +95,8 @@ export function exportPdf(demo) {
     .step-number{color:${accent};font-size:10pt;font-weight:700;font-variant-numeric:tabular-nums}.step h2{font-size:16pt;line-height:1.25;margin:0;letter-spacing:-.02em}
     .step p{color:${muted};margin:12px 0 0;white-space:normal}.screen-frame{position:relative;display:table;width:fit-content;max-width:100%;margin:0 auto;line-height:0}.step-image{display:block;width:auto;max-width:100%;max-height:8.2in;height:auto;border:1px solid #dcdcd6;border-radius:6px;background:#fff}
     .cursor-marker{position:absolute;width:14px;height:18px;overflow:visible;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
-    @page{size:A4;margin:16mm 15mm} @media print{body{max-width:none;padding:0;background:${surface};-webkit-print-color-adjust:exact;print-color-adjust:exact}header{break-after:avoid}.step{break-inside:avoid}}
-  </style></head><body><header><p>${escapePdfHtml(t("export.pdfTitle"))}</p><h1>${escapePdfHtml(demo?.name || t("export.pdfTitle"))}</h1><small>${escapePdfHtml(t("export.pdfStepCount", { n: steps.length }))}</small></header>${stepHtml}</body></html>`);
+    @page{size:A4;margin:0} @media print{body{max-width:none;padding:16mm 15mm;background:${surface};-webkit-print-color-adjust:exact;print-color-adjust:exact}header{break-after:avoid}.step{break-inside:avoid}}
+  </style></head><body><header><p>${escapePdfHtml(t("export.pdfTitle"))}</p><h1>${escapePdfHtml(demo?.name || t("export.pdfTitle"))}</h1><small>${escapePdfHtml(t("export.pdfStepCount", { n: stepCount }))}</small></header>${stepHtml}</body></html>`);
   printWindow.document.close();
 
   const startPrint = async () => {

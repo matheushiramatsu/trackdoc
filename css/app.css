@@ -1686,6 +1686,12 @@ body.is-presenting .slide-card-close {
   color: var(--ns-button-text);
 }
 
+/* buttonMotion usa position: relative; estes controles continuam ancorados ao slide. */
+.slide-card-close.has-origin-motion,
+.slide-card-play.has-origin-motion {
+  position: absolute;
+}
+
 .slide-card-play:hover {
   background: var(--demo-accent-dark);
 }
