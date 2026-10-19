@@ -5,6 +5,7 @@ import {
   themeToForm,
   formToTheme,
   normalizeSteps,
+  ensureClickPoint,
 } from "./store.js";
 import {
   ensureMigrated,
@@ -717,6 +718,7 @@ function copyProjectContentToClipboard(source, indices = null) {
       demo.steps = indices.map((index) => copiedProject.steps?.[index]).filter(Boolean);
     }
     const embeddedDemo = await embedImagesInDemo(demo);
+    await addEmailCursorMarkers(embeddedDemo);
     return buildProjectClipboardContent(embeddedDemo);
   });
   const item = new ClipboardItem({
@@ -724,6 +726,80 @@ function copyProjectContentToClipboard(source, indices = null) {
     "text/plain": content.then(({ text }) => new Blob([text], { type: "text/plain" })),
   });
   return navigator.clipboard.write([item]);
+}
+
+async function addEmailCursorMarkers(demo) {
+  const markerStroke = /^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(String(demo?.theme?.title || ""))
+    ? demo.theme.title
+    : "#0a0a0f";
+
+  await Promise.all((demo?.steps || []).map(async (step) => {
+    if (step?.type === "slide" || step?.simulateClick === false || !step?.image?.startsWith("data:image/")) return;
+
+    const image = new Image();
+    image.src = step.image;
+    try {
+      await image.decode();
+    } catch {
+      return;
+    }
+    if (!image.naturalWidth || !image.naturalHeight) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    context.drawImage(image, 0, 0);
+    const point = ensureClickPoint(step);
+    const markerScale = Math.max(1, image.naturalWidth / 720);
+    const clickX = Number.isFinite(Number(point.x))
+      ? Math.min(100, Math.max(0, Number(point.x)))
+      : 47;
+    const clickY = Number.isFinite(Number(point.y))
+      ? Math.min(100, Math.max(0, Number(point.y)))
+      : 44;
+    context.save();
+    context.translate(
+      image.naturalWidth * clickX / 100,
+      image.naturalHeight * clickY / 100,
+    );
+    context.scale(markerScale * 14 / 24, markerScale * 18 / 30);
+
+    // Replica o ponteiro usado no PDF e o rasteriza para sobreviver ao colar em clientes de e-mail.
+    context.beginPath();
+    context.moveTo(2, 2);
+    context.lineTo(2, 25);
+    context.lineTo(8.3, 18.9);
+    context.lineTo(12.4, 27.9);
+    context.lineTo(16.4, 26.1);
+    context.lineTo(12.2, 17.3);
+    context.lineTo(21, 17.3);
+    context.closePath();
+    context.fillStyle = "#fff";
+    context.shadowColor = "rgba(0,0,0,.3)";
+    context.shadowBlur = 2;
+    context.shadowOffsetY = 1;
+    context.fill();
+    context.strokeStyle = "#fff";
+    context.lineWidth = 4;
+    context.lineJoin = "round";
+    context.stroke();
+    context.shadowColor = "transparent";
+    context.shadowBlur = 0;
+    context.shadowOffsetY = 0;
+    context.strokeStyle = markerStroke;
+    context.lineWidth = 1.6;
+    context.stroke();
+    context.restore();
+
+    try {
+      step.image = canvas.toDataURL("image/png");
+    } catch {
+      // Mantém a captura original se o navegador não conseguir rasterizar o cursor.
+    }
+  }));
 }
 
 function clearBootGate() {
