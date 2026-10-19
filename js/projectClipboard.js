@@ -30,8 +30,8 @@ export function buildProjectClipboardContent(demo) {
     if (image) {
       const alt = step?.popover?.title || step?.label || "";
       const imageWidth = Number.isFinite(Number(step?.clipboardImageWidth))
-        ? Math.min(450, Math.max(1, Math.round(Number(step.clipboardImageWidth))))
-        : 450;
+        ? Math.min(600, Math.max(1, Math.round(Number(step.clipboardImageWidth))))
+        : 600;
       rows.push(`<tr><td align="center" style="padding:0;text-align:center"><img src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" width="${imageWidth}" style="display:block;width:${imageWidth}px;max-width:100%;height:auto;border:1px solid #dedede;border-radius:4px"></td></tr>`);
       textSteps.push("[Imagem]");
     }
