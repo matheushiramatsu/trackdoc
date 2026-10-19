@@ -2426,9 +2426,8 @@ body.view-share .caption-bar {
   height: 18px;
   margin-left: -9px;
   margin-top: -9px;
-  border: 2px solid color-mix(in srgb, var(--demo-accent) 78%, white);
   border-radius: 50%;
-  background: color-mix(in srgb, var(--demo-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--demo-accent) 20%, transparent);
   z-index: 1000000010;
   pointer-events: none;
   opacity: 0;
@@ -2438,9 +2437,6 @@ body.view-share .caption-bar {
     top 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.12s ease-out,
     opacity 0.2s ease;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--demo-accent) 70%, #111),
-    0 2px 5px rgba(0, 0, 0, 0.32),
-    inset 0 1px 2px rgba(255, 255, 255, 0.45);
 }
 
 .sim-cursor.is-visible {
@@ -2449,12 +2445,15 @@ body.view-share .caption-bar {
 }
 
 .sim-cursor.is-click {
-  animation: cursor-sink 0.28s cubic-bezier(0.2, 0.75, 0.3, 1) forwards;
+  animation: cursor-pulse 0.36s ease-out forwards;
 }
 
-@keyframes cursor-sink {
+@keyframes cursor-pulse {
   0% { transform: translate(0, 0) scale(1); }
-  42%, 100% { transform: translate(0, 2px) scale(0.72); }
+  25% { transform: translate(0, 0) scale(0.8); }
+  50% { transform: translate(0, 0) scale(0.64); }
+  75% { transform: translate(0, 0) scale(1.04); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 .toast {

@@ -787,20 +787,23 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function drawCursor(ctx, x, y, pressProgress, rgb) {
   const progress = Math.min(1, Math.max(0, pressProgress));
-  const sink = Math.min(1, progress / 0.42);
+  let scale = 1;
+  if (progress < 0.25) {
+    scale = 1 - (progress / 0.25) * 0.2;
+  } else if (progress < 0.5) {
+    scale = 0.8 - ((progress - 0.25) / 0.25) * 0.16;
+  } else if (progress < 0.75) {
+    scale = 0.64 + ((progress - 0.5) / 0.25) * 0.4;
+  } else {
+    scale = 1.04 - ((progress - 0.75) / 0.25) * 0.04;
+  }
   ctx.save();
-  ctx.translate(x, y + sink * 2);
-  ctx.scale(1 - sink * 0.28, 1 - sink * 0.28);
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
   ctx.beginPath();
   ctx.arc(0, 0, 9, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`;
+  ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
   ctx.fill();
-  ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.88)`;
-  ctx.lineWidth = 1.5;
-  ctx.shadowColor = "rgba(0,0,0,0.45)";
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetY = 2;
-  ctx.stroke();
   ctx.restore();
 }
 
