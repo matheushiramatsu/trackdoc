@@ -2455,6 +2455,7 @@ body.view-share .caption-bar {
   border: 2px solid var(--demo-cursor, var(--demo-accent));
   border-radius: 50%;
   background: transparent;
+  box-shadow: 0 0 5px color-mix(in srgb, var(--demo-cursor, var(--demo-accent)) 42%, transparent);
   z-index: 1000000010;
   pointer-events: none;
   opacity: 0;

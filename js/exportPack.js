@@ -793,6 +793,8 @@ function drawCursor(ctx, x, y, pressProgress, rgb) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
+  ctx.shadowColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`;
+  ctx.shadowBlur = 5;
   const fillRadius = 7 * pulse;
   if (fillRadius > 0) {
     ctx.beginPath();
