@@ -2426,8 +2426,9 @@ body.view-share .caption-bar {
   height: 18px;
   margin-left: -9px;
   margin-top: -9px;
+  border: 2px solid var(--demo-accent);
   border-radius: 50%;
-  background: var(--demo-accent);
+  background: transparent;
   z-index: 1000000010;
   pointer-events: none;
   opacity: 0;
@@ -2439,6 +2440,16 @@ body.view-share .caption-bar {
     opacity 0.2s ease;
 }
 
+.sim-cursor::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--demo-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .sim-cursor.is-visible {
   opacity: 1;
   transform: translate(0, 0) scale(1);
@@ -2448,11 +2459,21 @@ body.view-share .caption-bar {
   animation: cursor-pulse 1s ease-in-out infinite;
 }
 
+.sim-cursor.is-click::after {
+  animation: cursor-fill 1s ease-in-out infinite;
+}
+
 @keyframes cursor-pulse {
   0%, 100% { transform: translate(0, 0) scale(1); }
   25% { transform: translate(0, 0) scale(0.8); }
   50% { transform: translate(0, 0) scale(0.64); }
   75% { transform: translate(0, 0) scale(1.04); }
+}
+
+@keyframes cursor-fill {
+  0%, 100% { opacity: 0; }
+  25%, 75% { opacity: 0.45; }
+  50% { opacity: 1; }
 }
 
 .toast {

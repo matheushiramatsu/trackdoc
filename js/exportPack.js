@@ -797,13 +797,28 @@ function drawCursor(ctx, x, y, pressProgress, rgb) {
   } else {
     scale = 1.04 - ((progress - 0.75) / 0.25) * 0.04;
   }
+  let fillOpacity = 0;
+  if (progress < 0.25) {
+    fillOpacity = (progress / 0.25) * 0.45;
+  } else if (progress < 0.5) {
+    fillOpacity = 0.45 + ((progress - 0.25) / 0.25) * 0.55;
+  } else if (progress < 0.75) {
+    fillOpacity = 1 - ((progress - 0.5) / 0.25) * 0.55;
+  } else {
+    fillOpacity = 0.45 * (1 - (progress - 0.75) / 0.25);
+  }
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
   ctx.beginPath();
   ctx.arc(0, 0, 9, 0, Math.PI * 2);
+  ctx.globalAlpha = fillOpacity;
   ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
   ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.restore();
 }
 
