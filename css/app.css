@@ -830,6 +830,15 @@ textarea {
   background: var(--ns-hover);
 }
 
+.export-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-option:disabled:hover {
+  background: transparent;
+}
+
 .export-option[hidden] {
   display: none;
 }

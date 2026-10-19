@@ -1174,6 +1174,8 @@ function bindChrome() {
     }
   });
 
+  document.getElementById("btn-copy-selected-content")?.addEventListener("click", closeExportMenu);
+
   function showExportOverlay(title, { cancelable = false, preview = false } = {}) {
     overlayTitle.textContent = title;
     overlayStatus.textContent = "";
