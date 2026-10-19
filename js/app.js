@@ -746,7 +746,7 @@ async function prepareEmailClipboardImages(demo) {
     }
     if (!image.naturalWidth || !image.naturalHeight) return;
 
-    const displayWidth = Math.min(emailImageMaxWidth, image.naturalWidth);
+    const displayWidth = emailImageMaxWidth;
     step.clipboardImageWidth = displayWidth;
     if (step?.simulateClick === false) return;
 
