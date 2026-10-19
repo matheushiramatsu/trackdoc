@@ -61,7 +61,7 @@ export function createClickFxController(els) {
     if (pressHotspot && els.hotspot) els.hotspot.classList.add("is-pressed");
     playRippleAt(target.x, target.y);
 
-    await wait(220);
+    await wait(280);
     els.cursor.classList.remove("is-click");
 
     await wait(380);

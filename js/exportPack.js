@@ -231,7 +231,6 @@ ${css}
         <div class="click-fx" id="click-fx" hidden aria-hidden="true">
           <span class="click-fx-ring"></span>
           <span class="click-fx-ring click-fx-ring-2"></span>
-          <span class="click-fx-burst"></span>
         </div>
         <div class="sim-cursor" id="sim-cursor" hidden></div>
         <div class="caption-bar" id="player-caption" hidden></div>
@@ -790,30 +789,35 @@ function roundRect(ctx, x, y, w, h, r) {
   addRoundRect(ctx, x, y, w, h, r);
 }
 
-function drawCursor(ctx, x, y, pressProgress, rgb) {
+function drawCursor(ctx, x, y, pressProgress, rippleProgress, rgb) {
   const progress = Math.min(1, Math.max(0, pressProgress));
-  const sink = progress < 0.55 ? progress / 0.55 : (1 - progress) / 0.45;
+  const sink = progress < 0.42 ? progress / 0.42 : (1 - progress) / 0.58;
   ctx.save();
-  ctx.translate(x, y + sink * 4);
-  ctx.scale(1 - sink * 0.28, 1 - sink * 0.28);
+  ctx.translate(x, y + sink * 2);
+  ctx.scale(1 - sink * 0.38, 1 - sink * 0.38);
   ctx.beginPath();
-  ctx.arc(0, 0, 13, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.24)`;
+  ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`;
   ctx.fill();
-  ctx.strokeStyle = "#fff";
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.88)`;
+  ctx.lineWidth = 2;
   ctx.shadowColor = "rgba(0,0,0,0.45)";
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 3;
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetY = 2;
   ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(0, 0, 5.5 * (1 - sink * 0.42), 0, Math.PI * 2);
-  ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-  ctx.shadowColor = "rgba(0,0,0,0.28)";
-  ctx.shadowBlur = 3;
-  ctx.shadowOffsetY = 1;
-  ctx.fill();
   ctx.restore();
+
+  const ripple = Math.min(1, Math.max(0, rippleProgress));
+  for (const delay of [0, 0.16]) {
+    const wave = Math.min(1, Math.max(0, (ripple - delay) / (1 - delay)));
+    if (wave <= 0) continue;
+    const eased = 1 - Math.pow(1 - wave, 2);
+    ctx.beginPath();
+    ctx.arc(x, y, 12 + eased * 26, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${(1 - wave) * 0.72})`;
+    ctx.lineWidth = 1.5 - wave * 0.6;
+    ctx.stroke();
+  }
 }
 
 function hexRgb(hex) {
@@ -1099,17 +1103,11 @@ function renderFrame(ctx, scene, theme) {
         const pressProgress = at >= cursorEnd && at < clickEnd
           ? (at - cursorEnd) / pressDuration
           : 0;
-        drawCursor(ctx, cx, cy, pressProgress, rgb);
-      }
-
-      if (at >= cursorEnd && at < clickEnd + 350) {
-        const rt = (at - cursorEnd) / 700;
-        const radius = 18 + rt * 56;
-        ctx.beginPath();
-        ctx.arc(tx, ty, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${Math.max(0, 0.9 - rt)})`;
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        const rippleDuration = Math.max(1, clickEnd - cursorEnd + 350);
+        const rippleProgress = at >= cursorEnd
+          ? Math.min(1, (at - cursorEnd) / rippleDuration)
+          : 0;
+        drawCursor(ctx, cx, cy, pressProgress, rippleProgress, rgb);
       }
     }
   }

@@ -2430,8 +2430,7 @@ body.view-share .caption-bar {
   pointer-events: none;
 }
 
-.click-fx-ring,
-.click-fx-burst {
+.click-fx-ring {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -2441,23 +2440,16 @@ body.view-share .caption-bar {
 }
 
 .click-fx-ring {
-  width: 72px;
-  height: 72px;
-  border: 3px solid var(--ns-accent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--ns-accent) 55%, transparent);
+  width: 54px;
+  height: 54px;
+  border: 2px solid color-mix(in srgb, var(--ns-accent) 78%, white);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ns-accent) 28%, transparent);
 }
 
 .click-fx-ring-2 {
-  width: 110px;
-  height: 110px;
-  border-width: 2px;
-}
-
-.click-fx-burst {
-  width: 18px;
-  height: 18px;
-  background: var(--ns-accent);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--ns-accent) 80%, transparent);
+  width: 82px;
+  height: 82px;
+  border-width: 1.5px;
 }
 
 .click-fx.is-active .click-fx-ring {
@@ -2468,45 +2460,26 @@ body.view-share .caption-bar {
   animation: click-ripple 0.85s 0.06s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-.click-fx.is-active .click-fx-burst {
-  animation: click-burst 0.45s ease-out forwards;
-}
-
 @keyframes click-ripple {
   0% {
-    transform: translate(-50%, -50%) scale(0.15);
-    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(0.42);
+    opacity: 0.78;
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
-  }
-}
-
-@keyframes click-burst {
-  0% {
-    transform: translate(-50%, -50%) scale(0.4);
-    opacity: 1;
-  }
-  40% {
-    transform: translate(-50%, -50%) scale(1.35);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0.2);
+    transform: translate(-50%, -50%) scale(1.45);
     opacity: 0;
   }
 }
 
 .sim-cursor {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  margin-left: -14px;
-  margin-top: -14px;
-  border: 2px solid #fff;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  margin-top: -12px;
+  border: 2px solid color-mix(in srgb, var(--demo-accent) 78%, white);
   border-radius: 50%;
-  background: color-mix(in srgb, var(--demo-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--demo-accent) 18%, transparent);
   z-index: 1000000010;
   pointer-events: none;
   opacity: 0;
@@ -2516,20 +2489,9 @@ body.view-share .caption-bar {
     top 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.12s ease-out,
     opacity 0.2s ease;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--demo-accent) 80%, #111),
-    0 3px 7px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.55);
-}
-
-.sim-cursor::after {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border-radius: inherit;
-  background: var(--demo-accent);
-  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.28),
-    0 1px 2px rgba(255, 255, 255, 0.65);
-  transition: transform 0.18s ease, filter 0.18s ease;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--demo-accent) 70%, #111),
+    0 2px 5px rgba(0, 0, 0, 0.32),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45);
 }
 
 .sim-cursor.is-visible {
@@ -2538,18 +2500,13 @@ body.view-share .caption-bar {
 }
 
 .sim-cursor.is-click {
-  animation: cursor-sink 0.22s cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
-}
-
-.sim-cursor.is-click::after {
-  transform: scale(0.58);
-  filter: brightness(0.72);
+  animation: cursor-sink 0.28s cubic-bezier(0.2, 0.75, 0.3, 1) forwards;
 }
 
 @keyframes cursor-sink {
   0% { transform: translate(0, 0) scale(1); }
-  55% { transform: translate(1px, 5px) scale(0.68); }
-  100% { transform: translate(1px, 3px) scale(0.78); }
+  42% { transform: translate(0, 2px) scale(0.62); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 .toast {
