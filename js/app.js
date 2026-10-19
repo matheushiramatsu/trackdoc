@@ -729,7 +729,7 @@ function copyProjectContentToClipboard(source, indices = null) {
 }
 
 async function prepareEmailClipboardImages(demo) {
-  const emailImageMaxWidth = 600;
+  const emailImageMaxWidth = 720;
   const markerStroke = /^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(String(demo?.theme?.title || ""))
     ? demo.theme.title
     : "#0a0a0f";
@@ -767,7 +767,7 @@ async function prepareEmailClipboardImages(demo) {
     const markerScale = image.naturalWidth / displayWidth;
     context.save();
     context.translate(canvas.width * clickX / 100, canvas.height * clickY / 100);
-    context.scale(markerScale * 9.333333 / 24, markerScale * 12 / 30);
+    context.scale(markerScale * 11.2 / 24, markerScale * 14.4 / 30);
 
     // Replica o ponteiro usado no PDF e o rasteriza para sobreviver ao colar em clientes de e-mail.
     context.beginPath();
