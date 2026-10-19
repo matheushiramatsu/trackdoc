@@ -220,6 +220,7 @@ export function createPlayer(ctx) {
       if (els.clickPoint) els.clickPoint.hidden = true;
 
       if (step.type === "slide") {
+        clickFx.reset();
         els.image.hidden = true;
         els.image.removeAttribute("src");
         if (els.missing) els.missing.hidden = true;
@@ -247,8 +248,11 @@ export function createPlayer(ctx) {
         if (ok) {
           placeHotspot(step.hotspot);
           els.hotspot.hidden = step.showHighlight !== true;
+          if (step.simulateClick === false) clickFx.reset();
+          else clickFx.moveTo(clickTarget(step));
         } else {
           els.hotspot.hidden = true;
+          clickFx.reset();
         }
         resolve();
       });

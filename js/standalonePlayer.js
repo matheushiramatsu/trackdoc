@@ -607,6 +607,7 @@ function gfT(key, vars) {
     return new Promise((resolve) => {
       narration.enterStep(step, !!speak);
       if (step.type === "slide") {
+        clickFx.reset();
         els.image.hidden = true;
         els.image.removeAttribute("src");
         const missing = document.getElementById("player-missing");
@@ -639,6 +640,10 @@ function gfT(key, vars) {
             placeHotspot(step.hotspot);
             if (step.showHighlight !== true) els.hotspot.style.display = "none";
             placeClickPoint(ensureClickPoint(step));
+            if (step.simulateClick === false) clickFx.reset();
+            else clickFx.moveTo(clickTarget(step));
+          } else {
+            clickFx.reset();
           }
           resolve();
         });

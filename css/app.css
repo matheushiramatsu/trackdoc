@@ -2427,7 +2427,7 @@ body.view-share .caption-bar {
   margin-left: -9px;
   margin-top: -9px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--demo-accent) 20%, transparent);
+  background: var(--demo-accent);
   z-index: 1000000010;
   pointer-events: none;
   opacity: 0;
@@ -2445,15 +2445,14 @@ body.view-share .caption-bar {
 }
 
 .sim-cursor.is-click {
-  animation: cursor-pulse 0.36s ease-out forwards;
+  animation: cursor-pulse 1s ease-in-out infinite;
 }
 
 @keyframes cursor-pulse {
-  0% { transform: translate(0, 0) scale(1); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
   25% { transform: translate(0, 0) scale(0.8); }
   50% { transform: translate(0, 0) scale(0.64); }
   75% { transform: translate(0, 0) scale(1.04); }
-  100% { transform: translate(0, 0) scale(1); }
 }
 
 .toast {

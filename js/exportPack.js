@@ -802,7 +802,7 @@ function drawCursor(ctx, x, y, pressProgress, rgb) {
   ctx.scale(scale, scale);
   ctx.beginPath();
   ctx.arc(0, 0, 9, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+  ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
   ctx.fill();
   ctx.restore();
 }
@@ -1086,11 +1086,10 @@ function renderFrame(ctx, scene, theme) {
       const cx = sx + (tx - sx) * ease;
       const cy = sy + (ty - sy) * ease;
       if (at >= cursorStart) {
-        const pressDuration = Math.max(1, clickEnd - cursorEnd);
-        const pressProgress = at >= cursorEnd
-          ? (at - cursorEnd) / pressDuration
+        const pulseProgress = at >= cursorEnd
+          ? ((at - cursorEnd) % 1000) / 1000
           : 0;
-        drawCursor(ctx, cx, cy, pressProgress, rgb);
+        drawCursor(ctx, cx, cy, pulseProgress, rgb);
       }
     }
   }
