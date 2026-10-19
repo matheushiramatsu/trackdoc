@@ -2461,8 +2461,8 @@ body.view-share .caption-bar {
   opacity: 0;
   transform: translate(18px, 18px) scale(0.78);
   transition:
-    left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    top 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.9s cubic-bezier(0.45, 0, 0.55, 1),
+    top 0.9s cubic-bezier(0.45, 0, 0.55, 1),
     transform 0.12s ease-out,
     opacity 0.2s ease;
 }
