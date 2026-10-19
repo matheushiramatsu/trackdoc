@@ -787,26 +787,9 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function drawCursor(ctx, x, y, pressProgress, rgb) {
   const progress = Math.min(1, Math.max(0, pressProgress));
-  let scale = 1;
-  if (progress < 0.25) {
-    scale = 1 - (progress / 0.25) * 0.2;
-  } else if (progress < 0.5) {
-    scale = 0.8 - ((progress - 0.25) / 0.25) * 0.16;
-  } else if (progress < 0.75) {
-    scale = 0.64 + ((progress - 0.5) / 0.25) * 0.4;
-  } else {
-    scale = 1.04 - ((progress - 0.75) / 0.25) * 0.04;
-  }
-  let fillOpacity = 0;
-  if (progress < 0.25) {
-    fillOpacity = (progress / 0.25) * 0.45;
-  } else if (progress < 0.5) {
-    fillOpacity = 0.45 + ((progress - 0.25) / 0.25) * 0.55;
-  } else if (progress < 0.75) {
-    fillOpacity = 1 - ((progress - 0.5) / 0.25) * 0.55;
-  } else {
-    fillOpacity = 0.45 * (1 - (progress - 0.75) / 0.25);
-  }
+  const pulse = Math.sin(Math.PI * progress);
+  const scale = 1 - 0.36 * pulse;
+  const fillOpacity = pulse;
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
@@ -1102,7 +1085,7 @@ function renderFrame(ctx, scene, theme) {
       const cy = sy + (ty - sy) * ease;
       if (at >= cursorStart) {
         const pulseProgress = at >= cursorEnd
-          ? ((at - cursorEnd) % 1000) / 1000
+          ? ((at - cursorEnd) % 1200) / 1200
           : 0;
         drawCursor(ctx, cx, cy, pulseProgress, rgb);
       }
