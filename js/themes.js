@@ -4,12 +4,24 @@
 
 export const THEME_COLOR_KEYS = [
   "accent",
+  "cursor",
   "overlay",
   "popoverBg",
   "title",
   "text",
   "button",
   "hotspot",
+];
+
+export const CURSOR_COLOR_PRESETS = [
+  { id: "blue", color: "#1732FF" },
+  { id: "white", color: "#FFFFFF" },
+  { id: "black", color: "#111827" },
+  { id: "cyan", color: "#06B6D4" },
+  { id: "green", color: "#10B981" },
+  { id: "orange", color: "#F97316" },
+  { id: "pink", color: "#EC4899" },
+  { id: "violet", color: "#8B5CF6" },
 ];
 
 /** Presets do design system (Claro / Escuro) — usados pelo botão Aparência */
@@ -150,6 +162,7 @@ export function defaultTheme() {
 export function cloneTheme(colors, meta = {}) {
   const next = {
     accent: colors.accent,
+    cursor: colors.cursor || colors.accent,
     accentDark: colors.accentDark || darkenHex(colors.accent),
     overlay: colors.overlay,
     popoverBg: colors.popoverBg,
@@ -250,7 +263,8 @@ export function cycleAppearancePreference(current = getAppearancePreference()) {
 
 function colorsEqual(a, b) {
   return THEME_COLOR_KEYS.every(
-    (key) => normalizeHex(a[key]) === normalizeHex(b[key])
+    (key) => normalizeHex(key === "cursor" ? (a.cursor || a.accent) : a[key]) ===
+      normalizeHex(key === "cursor" ? (b.cursor || b.accent) : b[key])
   );
 }
 

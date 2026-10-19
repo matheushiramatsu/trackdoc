@@ -34,6 +34,7 @@
   --ns-topbar-muted: #a1a1ad;
   /* Demo tour defaults (overridden by applyTheme → --demo-*) */
   --demo-accent: #1732ff;
+  --demo-cursor: #1732ff;
   --demo-accent-dark: #142bd9;
   --demo-overlay: #24262d;
   --demo-popover-bg: #ffffff;

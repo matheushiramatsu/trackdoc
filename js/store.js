@@ -9,6 +9,7 @@ export function applyTheme(theme) {
   if (!theme) return;
   // why: --demo-* isola o tema do tour do chrome do app (--ns-* via data-appearance)
   root.style.setProperty("--demo-accent", theme.accent);
+  root.style.setProperty("--demo-cursor", theme.cursor || theme.accent);
   root.style.setProperty("--demo-accent-dark", theme.accentDark || theme.accent);
   root.style.setProperty("--demo-overlay", theme.overlay);
   root.style.setProperty("--demo-popover-bg", theme.popoverBg);
@@ -70,6 +71,7 @@ export function themeOverlayPaint(baseOpacity = 0.55) {
 export function themeToForm(theme) {
   const map = {
     accent: "theme-accent",
+    cursor: "theme-cursor",
     overlay: "theme-overlay",
     popoverBg: "theme-popoverBg",
     title: "theme-title",
@@ -79,7 +81,8 @@ export function themeToForm(theme) {
   };
   for (const [key, id] of Object.entries(map)) {
     const el = document.getElementById(id);
-    if (el && theme[key]) el.value = normalizeHex(theme[key]);
+    const value = key === "cursor" ? (theme.cursor || theme.accent) : theme[key];
+    if (el && value) el.value = normalizeHex(value);
   }
 }
 
@@ -89,6 +92,7 @@ export function formToTheme(current = {}) {
   return {
     ...current,
     accent,
+    cursor: document.getElementById("theme-cursor")?.value || current.cursor || accent,
     accentDark: darkenHex(accent),
     overlay: document.getElementById("theme-overlay")?.value || current.overlay,
     popoverBg: document.getElementById("theme-popoverBg")?.value || current.popoverBg,

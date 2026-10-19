@@ -34,6 +34,7 @@ function gfT(key, vars) {
       (theme.presetId === "social" ? "social" : "documento");
     // Export HTML já traz data-appearance do pack; tema do tour fica em --demo-*
     root.style.setProperty("--demo-accent", theme.accent);
+    root.style.setProperty("--demo-cursor", theme.cursor || theme.accent);
     root.style.setProperty("--demo-accent-dark", theme.accentDark || theme.accent);
     root.style.setProperty("--demo-overlay", theme.overlay);
     root.style.setProperty("--demo-popover-bg", theme.popoverBg);

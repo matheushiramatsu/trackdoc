@@ -757,6 +757,32 @@ textarea {
   border-radius: 4px;
 }
 
+.cursor-color-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cursor-color-swatch {
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 2px solid var(--ns-panel);
+  border-radius: 50%;
+  background: var(--cursor-swatch);
+  box-shadow: 0 0 0 1px var(--ns-border);
+  cursor: pointer;
+}
+
+.cursor-color-swatch.is-active {
+  box-shadow: 0 0 0 2px var(--ns-accent);
+}
+
+.cursor-color-swatch:focus-visible {
+  outline: 2px solid var(--ns-accent);
+  outline-offset: 3px;
+}
+
 #narration-panel .theme-panel-body > label:not(.checkbox) {
   flex-direction: column;
   align-items: stretch;
@@ -2426,7 +2452,7 @@ body.view-share .caption-bar {
   height: 18px;
   margin-left: -9px;
   margin-top: -9px;
-  border: 2px solid var(--demo-accent);
+  border: 2px solid var(--demo-cursor, var(--demo-accent));
   border-radius: 50%;
   background: transparent;
   z-index: 1000000010;
@@ -2445,7 +2471,7 @@ body.view-share .caption-bar {
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  background: var(--demo-accent);
+  background: var(--demo-cursor, var(--demo-accent));
   transform: scale(0);
   transform-origin: center;
   pointer-events: none;

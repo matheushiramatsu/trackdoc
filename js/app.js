@@ -28,6 +28,7 @@ import { appendCaptureToProject } from "./stepClipboard.js";
 import { renumberScenes } from "./scenes.js";
 import {
   THEME_PRESETS,
+  CURSOR_COLOR_PRESETS,
   cloneTheme,
   createThemeId,
   matchThemeSelection,
@@ -600,6 +601,23 @@ function renderThemePanel() {
     onPick: (id) => applyCustomTheme(id),
     customActions: true,
   });
+  const cursorPresets = document.getElementById("cursor-color-presets");
+  if (cursorPresets) {
+    const selectedColor = String(project?.theme?.cursor || project?.theme?.accent || "#1732FF").toLowerCase();
+    cursorPresets.innerHTML = CURSOR_COLOR_PRESETS.map(({ id, color }) => {
+      const label = t(`theme.cursorPreset.${id}`);
+      const active = color.toLowerCase() === selectedColor;
+      return `<button type="button" class="cursor-color-swatch${active ? " is-active" : ""}" data-cursor-color="${color}" style="--cursor-swatch:${color}" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}" aria-pressed="${active}"></button>`;
+    }).join("");
+    cursorPresets.querySelectorAll("[data-cursor-color]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const input = document.getElementById("theme-cursor");
+        if (!input) return;
+        input.value = button.dataset.cursorColor;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    });
+  }
 }
 
 function applyPresetTheme(id) {

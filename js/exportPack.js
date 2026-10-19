@@ -58,6 +58,7 @@ export function exportPdf(demo) {
 
   const theme = demo?.theme || {};
   const accent = pdfColor(theme.accent, "#2f6bff");
+  const cursorColor = pdfColor(theme.cursor, accent);
   const ink = pdfColor(theme.title, "#0a0a0f");
   const muted = pdfColor(theme.text, "#4a4a55");
   const surface = pdfColor(theme.popoverBg, "#ffffff");
@@ -76,7 +77,7 @@ export function exportPdf(demo) {
     if (src) {
       const clickPoint = step?.simulateClick === false ? null : ensureClickPoint(step);
       const clickMarker = clickPoint
-        ? `<svg class="cursor-marker" style="left:${pdfPercent(clickPoint.x, 47)}%;top:${pdfPercent(clickPoint.y, 44)}%" viewBox="0 0 24 30" aria-hidden="true"><path d="M2 2v23l6.3-6.1 4.1 9 4-1.8-4.2-8.8H21L2 2Z" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M2 2v23l6.3-6.1 4.1 9 4-1.8-4.2-8.8H21L2 2Z" fill="#fff" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/></svg>`
+        ? `<svg class="cursor-marker" style="left:${pdfPercent(clickPoint.x, 47)}%;top:${pdfPercent(clickPoint.y, 44)}%" viewBox="0 0 24 30" aria-hidden="true"><path d="M2 2v23l6.3-6.1 4.1 9 4-1.8-4.2-8.8H21L2 2Z" fill="${cursorColor}" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M2 2v23l6.3-6.1 4.1 9 4-1.8-4.2-8.8H21L2 2Z" fill="${cursorColor}" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/></svg>`
         : "";
       image = `<div class="screen-frame"><img class="step-image" src="${escapePdfHtml(new URL(src, document.baseURI).href)}" alt="${escapePdfHtml(title)}">${clickMarker}</div>`;
     }
@@ -980,8 +981,8 @@ function drawPopover(ctx, theme, step, index, total, hs, bounds) {
 function renderFrame(ctx, scene, theme) {
   const W = ctx.canvas.width;
   const H = ctx.canvas.height;
-  const accent = theme.accent || "#1732FF";
-  const rgb = hexRgb(accent);
+  const cursorColor = theme.cursor || theme.accent || "#1732FF";
+  const rgb = hexRgb(cursorColor);
   const { step, index, total, img, cursorStart = 0, cursorEnd, clickEnd, holdEnd } = scene;
   const at = Number(scene.at ?? scene.t) || 0;
 
