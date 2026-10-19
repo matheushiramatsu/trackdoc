@@ -29,11 +29,14 @@ export function buildProjectClipboardContent(demo) {
     }
     if (image) {
       const alt = step?.popover?.title || step?.label || "";
-      rows.push(`<tr><td align="center" style="padding:0;text-align:center"><img src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" style="display:block;width:auto;max-width:100%;height:auto;border:1px solid #dedede;border-radius:4px"></td></tr>`);
+      const imageWidth = Number.isFinite(Number(step?.clipboardImageWidth))
+        ? Math.min(600, Math.max(1, Math.round(Number(step.clipboardImageWidth))))
+        : 600;
+      rows.push(`<tr><td align="center" style="padding:0;text-align:center"><img src="${escapeHtml(image)}" alt="${escapeHtml(alt)}" width="${imageWidth}" style="display:block;width:${imageWidth}px;max-width:100%;height:auto;border:1px solid #dedede;border-radius:4px"></td></tr>`);
       textSteps.push("[Imagem]");
     }
     if (rows.length) {
-      htmlSteps.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:720px;border-collapse:collapse;margin:0 0 24px"><tbody>${rows.join("")}</tbody></table>`);
+      htmlSteps.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;border-collapse:collapse;margin:0 0 24px"><tbody>${rows.join("")}</tbody></table>`);
     }
     if (rows.length && index < steps.length - 1) textSteps.push("");
   }
